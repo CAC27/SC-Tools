@@ -3,7 +3,8 @@
 *What's this?* It's a script adding tools to accept/reject friend requests, delete friends, and more. If you choose to provide a list of people you're dropping, it will be smart in keeping uninvited guests out and accepting your dropees quickly.
 
 ### First and foremost
-You need to install [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) for Chrome or [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) for Firefox. If you're using IE or Edge, I don't feel bad for you ¯\\_(ツ)_/¯
+You need to install [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) for Chrome or [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) for Firefox.
+If you're using IE, Edge, Safari, or some other obsolete browser, I don't feel bad for you ¯\\_(ツ)_/¯
 
 ### Installation
 Soon™
@@ -15,11 +16,11 @@ Looped requests (i.e. accepting multiple requests) are done once per second beca
 ##### When no droplist is active:
 Button | Function
 -------|---------
-'Delete all friends' | Unfriends everyone on your friends list.
+'Delete friends' | Unfriends everyone on your friends list.
 'Accept requests' | Accepts all friend requests you have received.
 'Reject requests' | Rejects all friend requests you have received.
 'Quick-add user' | Searches for a username, sends them a friend request, and accepts the confirmation all with one click.
-'Delete all messages' | Deletes all messages, sent and received, from your inbox.
+'Delete messages' | Deletes all messages, sent and received, from your inbox.
 
 ##### When a droplist is active:
 Button | Function
