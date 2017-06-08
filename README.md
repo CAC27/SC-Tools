@@ -3,11 +3,21 @@
 *What's this?* It's a script adding tools to accept/reject friend requests, delete friends, and more. If you choose to provide a list of people you're dropping, it will be smart in keeping uninvited guests out and accepting your dropees quickly.
 
 ### First and foremost
-You need to install [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) for Chrome or [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) for Firefox.
-If you're using IE, Edge, Safari, or some other useless browser, I don't feel bad for you ¯\\_(ツ)_/¯
+You need to install an extension that allows you to use userscripts. They're widely available:
+* Chrome: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=chrome) or [NinjaKit](https://chrome.google.com/webstore/detail/gpbepnljaakggeobkclonlkhbdgccfek)
+* Firefox: [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)
+* Edge: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=edge) 
+* Safari: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=safari) or [NinjaKit](http://ss-o.net/safari/extension/NinjaKit.safariextz)
+* Opera: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=opera) or [Violent Monkey](https://addons.opera.com/en/extensions/details/violent-monkey/)
+* Dolphin: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=dolphin)
+* UC Browser: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=ucweb)
+
+If you're using some other obsolete browser, I don't feel bad for you ¯\\_(ツ)_/¯
 
 ### Installation
-Soon™
+Just click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js) and you should be directed to an install page.
+
+Or, if you don't trust me enough for that, find `SC-Tools.user.js` in this repository and click `Raw`.
 
 ### About stats
 * Yellow question marks mean stats are hidden by the player.
