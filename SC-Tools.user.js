@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name         SC Tools
-// @version      1.0
+// @version      1.0.1
 // @description  Useful tools for dropping.
 // @author       CAC
+// @downloadURL  https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js
 // @icon         https://socialclub.rockstargames.com/favicon.ico
 // @match        https://socialclub.rockstargames.com/*
 // @match        https://*.socialclub.rockstargames.com/*
@@ -181,7 +182,8 @@ function Init(friendMessage, checkBlocked, debug) {
                 }
                 
                 function isOnDroplist(sc) {
-                    var dl = GM_getValue('droplist').map(e => { return e.sc; });
+                    var dl = GM_getValue('droplist').map(e => { return e.sc.toLowerCase(); });
+                    sc = sc.toLowerCase();
                     //if (debug) console.log('Checking if '+sc+' is on this list: \n'+dl);
                     return dl.indexOf(sc) > -1;
                 }
@@ -403,8 +405,8 @@ function Init(friendMessage, checkBlocked, debug) {
                             return item; //remove undefined and ''
                         });
                         var d = list.map(item => { return item.discord; });
-                        var s = list.map(item => { return item.sc; });
-                        var sc = temp[temp.indexOf(' - SC: ') + 1];
+                        var s = list.map(item => { return item.sc.toLowerCase(); });
+                        var sc = temp[temp.indexOf(' - SC: ') + 1].toLowerCase();
                         var di = temp[temp.indexOf('Discord Name: ') + 1];
 
                         if (s.indexOf(sc) > -1)
