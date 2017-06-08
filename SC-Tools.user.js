@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         SC Tools
-// @version      1.0.1
+// @version      1.0.2
 // @description  Useful tools for dropping.
 // @author       CAC
 // @downloadURL  https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js
@@ -12,6 +12,9 @@
 // @grant        GM_deleteValue
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // ==/UserScript==
+
+var baseURL = window.location.href.match(/^(https:\/\/(\w\w\.|es-mx\.)?socialclub\.rockstargames\.com).*$/)[1];
+//used for language compatibility [Do not delete, it will break the whole script]
 
 // SC regex: /^[a-z.A-Z_\d]{6,16}$/
 
@@ -34,16 +37,6 @@ function Init(friendMessage, checkBlocked, debug) {
 	var isReloaded = false;
 
 	try {
-		/*if (!document.getElementById("sct-jq")) {
-			var jQ = document.createElement('script');
-			jQ.id = "sct-jq";
-			jQ.src = "https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js";
-			document.getElementsByTagName('head')[0].appendChild(jQ);
-		} else {
-			isReloaded = true;
-			if (debug) console.log("jQuery was already present.");
-		}  -- implemented in @require -- */
-
 		if (!document.getElementById("sct-sacss")) {
 			var sacss = document.createElement('link');
 			sacss.id = "sct-sacss";
@@ -210,7 +203,7 @@ function Init(friendMessage, checkBlocked, debug) {
                     setTimeout( function() {
                         try {
                             $.ajax({
-                                url: "https://socialclub.rockstargames.com/games/gtav/career/overviewAjax?character=Freemode&nickname="+member.sc+"&slot=Freemode&gamerHandle=&gamerTag=&_="+Date.now(),
+                                url: baseURL+"/games/gtav/career/overviewAjax?character=Freemode&nickname="+member.sc+"&slot=Freemode&gamerHandle=&gamerTag=&_="+Date.now(),
                                     type: "GET",
                                     headers: {
                                         "Content-Type": "application/json",
@@ -550,7 +543,7 @@ function Init(friendMessage, checkBlocked, debug) {
                         function(isConfirm){
                             if (isConfirm) {
                                 $.ajax({
-                                    url: "https://socialclub.rockstargames.com/Message/GetMessageCount",
+                                    url: baseURL+"/Message/GetMessageCount",
                                     headers: {
                                         "Accept": "application/json",
                                         "RequestVerificationToken": verificationToken
@@ -669,7 +662,7 @@ function Init(friendMessage, checkBlocked, debug) {
                             }
 
                             $.ajax({
-                                url: "https://socialclub.rockstargames.com/Friends/GetAccountDetails?nickname="+inputValue.trim()+"&full=false",
+                                url: baseURL+"/Friends/GetAccountDetails?nickname="+inputValue.trim()+"&full=false",
                                 headers: {
                                     "Accept": "application/json",
                                     "RequestVerificationToken": verificationToken
@@ -764,7 +757,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                 var children = [];
 
                                 $.ajax({
-                                    url: "https://socialclub.rockstargames.com/friends/GetReceivedInvitesJson",
+                                    url: baseURL+"/friends/GetReceivedInvitesJson",
                                     headers: {
                                         "Accept": "application/json",
                                         "RequestVerificationToken": verificationToken
@@ -877,7 +870,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                 var children = [];
 
                                 $.ajax({
-                                    url: "https://socialclub.rockstargames.com/friends/GetReceivedInvitesJson",
+                                    url: baseURL+"/friends/GetReceivedInvitesJson",
                                     headers: {
                                         "Accept": "application/json",
                                         "RequestVerificationToken": verificationToken
@@ -988,7 +981,7 @@ function Init(friendMessage, checkBlocked, debug) {
                         function(isConfirm){
                             if (isConfirm) {
                                 $.ajax({
-                                    url: "https://socialclub.rockstargames.com/friends/GetFriendsAndInvitesSentJson?pageNumber=0&onlineService=sc&pendingInvitesOnly=false",
+                                    url: baseURL+"/friends/GetFriendsAndInvitesSentJson?pageNumber=0&onlineService=sc&pendingInvitesOnly=false",
                                     headers: {
                                         "Accept": "application/json",
                                         "RequestVerificationToken": verificationToken
@@ -1066,7 +1059,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                         setTimeout(function() {
                             $.ajax({
-                                url: "https://socialclub.rockstargames.com/Message/GetConversationList?pageIndex="+pageIndex,
+                                url: baseURL+"/Message/GetConversationList?pageIndex="+pageIndex,
                                 headers: {
                                     "Accept": "application/json",
                                     "RequestVerificationToken": verificationToken
@@ -1118,7 +1111,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                     }
                                 }
                             });
-                        }, 1000)
+                        }, 1000);
                     } catch (err) {
                         console.error("Error during RetrieveAllMessageUsers():\n\n"+err.stack);
                         return;
@@ -1146,7 +1139,7 @@ function Init(friendMessage, checkBlocked, debug) {
                             };
 
                             $.ajax({
-                                url: "https://socialclub.rockstargames.com/Message/GetMessages?rockstarId="+item.RockstarId,
+                                url: baseURL+"/Message/GetMessages?rockstarId="+item.RockstarId,
                                 headers: {
                                     "Accept": "application/json",
                                     "RequestVerificationToken": verificationToken
@@ -1226,7 +1219,7 @@ function Init(friendMessage, checkBlocked, debug) {
                             };
 
                             $.ajax({
-                                url: "https://socialclub.rockstargames.com/Message/DeleteMessage",
+                                url: baseURL+"/Message/DeleteMessage",
                                 type: "POST",
                                 data: '{"messageid":'+item.ID+',"isAdmin":'+item.IsAdminMessage+'}',
                                 headers: {
@@ -1339,7 +1332,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                         setTimeout(function() {
                             $.ajax({
-                                url: "https://socialclub.rockstargames.com/friends/GetFriendsAndInvitesSentJson?pageNumber="+pageIndex+"&onlineService=sc&pendingInvitesOnly=false",
+                                url: baseURL+"/friends/GetFriendsAndInvitesSentJson?pageNumber="+pageIndex+"&onlineService=sc&pendingInvitesOnly=false",
                                 headers: {
                                     "Accept": "application/json",
                                     "RequestVerificationToken": verificationToken
@@ -1454,7 +1447,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                             if (item.AllowDelete === true) {
                                 $.ajax({
-                                    url: "https://socialclub.rockstargames.com/friends/UpdateFriend",
+                                    url: baseURL+"/friends/UpdateFriend",
                                     type: "PUT",
                                     data: '{"id":'+item.RockstarId+',"op":"delete"}',
                                     headers: {
@@ -1570,7 +1563,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                 });
                             } else if (item.AllowCancel === true) {
                                 $.ajax({
-                                    url: "https://socialclub.rockstargames.com/friends/UpdateFriend",
+                                    url: baseURL+"/friends/UpdateFriend",
                                     type: "PUT",
                                     data: '{"id":'+item.RockstarId+',"op":"cancel"}',
                                     headers: {
@@ -1686,7 +1679,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                 });
                             } else if (item.AllowAdd === true) {
                                 $.ajax({
-                                    url: "https://socialclub.rockstargames.com/friends/UpdateFriend",
+                                    url: baseURL+"/friends/UpdateFriend",
                                     type: "PUT",
                                     data: '{"id":'+item.RockstarId+',"op":"ignore"}',
                                     headers: {
@@ -1848,7 +1841,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                         setTimeout(function() {
                             $.ajax({
-                                url: "https://socialclub.rockstargames.com/friends/GetBlockedJson",
+                                url: baseURL+"/friends/GetBlockedJson",
                                 headers: {
                                     "Accept": "application/json",
                                     "RequestVerificationToken": verificationToken
@@ -1926,7 +1919,7 @@ function Init(friendMessage, checkBlocked, debug) {
                 function AddFriend(source) {
                     try {
                         $.ajax({
-                            url: "https://socialclub.rockstargames.com/friends/UpdateFriend",
+                            url: baseURL+"/friends/UpdateFriend",
                             type: "PUT",
                             data: '{"id":'+source.RockstarId+',"op":"addfriend","custommessage":"'+friendMessage.trim().replace(/\s\s+/g, ' ')+'"}',
                             headers: {
@@ -2039,7 +2032,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                                 if (debug) console.log('Making request: {"id":'+item.RockstarId+',"op":"confirm","custommessage":"","accept":"true"}');//  }');//
                                 $.ajax({
-                                    url: "https://socialclub.rockstargames.com/friends/UpdateFriend",
+                                    url: baseURL+"/friends/UpdateFriend",
                                     type: "PUT",
                                     data: '{"id":'+item.RockstarId+',"op":"confirm","custommessage":"","accept":"true"}',//  }',//
                                     headers: {
@@ -2179,7 +2172,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                             if (debug) console.log('Making request: https://socialclub.rockstargames.com/reference/friendfeed');//  }');//
                             $.ajax({
-                                url: "https://socialclub.rockstargames.com/reference/remove_activity/"+item.activityId+"/92155523/FRIEND/34708577",
+                                url: baseURL+"/reference/remove_activity/"+item.activityId+"/92155523/FRIEND/34708577",
                                 type: "DELETE",
                                 headers: {
                                     "Content-Type": "application/json",
