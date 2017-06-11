@@ -23,10 +23,11 @@ If you can manage to use Tampermonkey and install this on another browser, good 
   * A. The request failed due to rate limits.
   * B. That user was banned/reset to rank 0.
 * Money amount *(which includes bank + wallet)* will automatically turn red if it's >500m.
+* If you've defined a personal limit, money amount will turn orange if said amount exceeds said limit.
+* The blue refresh buttons will refresh stats for a whole group of dropees. The "group" will be the next 12 dropees (before the next blue refresh button.)
 
 ### More info
 * `Auto-accept` works the same way as the normal accept button: accepts dropees if you have a droplist or all requests if you don't.
-* When adding to the droplist: if stat checking is enabled, only the first 15 are added. Just wait 30 seconds or so before adding the rest.
 * Looped requests (accept *all*, delete *all*, etc.) are done once per second because rate limits.
 * After accepting friends from the droplist, it's advisable to reload stats as many players set their privacy settings to only share stats with friends.
 
@@ -52,7 +53,7 @@ Delete dropees | Remove all friends / reject all requests from dropees. Useful i
 There is now a full-featured settings menu! This allows you to toggle a few options as well as fully customize which buttons appear on the top of the page. Just head over to the account settings menu and you'll see a brand-new option. ![Image of account settings](https://i.imgur.com/mF6yL5S.png)
 
 ### Troubleshooting
-* `Reload stats` will probably only work for the first 15 or so dropees, for now you might have to reload the others manually.
+* To set a personal limit, you must uncheck the box, change the number, then check it again.
 * If you're having trouble with `Delete all messages`, just run it a couple times and it'll delete all of them eventually.
 
 ### Credits
