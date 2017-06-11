@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         SC Tools
-// @version      1.3
+// @version      1.4
 // @description  Useful tools for dropping.
 // @author       CAC
 // @downloadURL  https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js
@@ -57,6 +57,9 @@ if (GM_getValue('delete2') === undefined) {
 if (GM_getValue('auto') === undefined) {
     GM_setValue('auto', true);
 }
+if (GM_getValue('limit') === undefined) {
+    GM_setValue('limit', false);
+}
 
 var auto = false;
 var autoPaused = false;
@@ -105,10 +108,8 @@ function Init(friendMessage, checkBlocked, debug) {
                     $('head').append('<style id="sctools_style">h3.sct { color: white; padding: 5px; } p.sct { color: #bbb; padding: 10px; } textarea#droplist_input { color: #fff; width: 99%; min-height: 300px; margin: 5px; background: #222; padding:  5px; border: 2px solid #444; border-radius: 10px; } a.btn.btngold.btnrounded.sctb2 { margin: 5px; } .gridPanel.sct { padding: 10px !important; } div#current_droplist { float: right; width: 59%; } div#droplist_info { float: left; width: 39%; } .empty, .gray { color: #666; } ul#current_list { color: #fff; background: #222; padding: 10px; margin: 5px; } #current_list li { padding:  5px; border-bottom: 2px solid #666; } .unknown { color: #FB0; } .bl { color: #F00; } .fail { color: #F70 } /*.rank { background: url(/images/games/GTAV/player-rank.png) no-repeat; background-size: 30px; padding: 4px 3px; }*/ .sctb-16 { float: right; height: 16px; width: 16px; background-size: 16px; display: inline-block; transition: 150ms; } .sctb-16:hover { filter: brightness(1.5); cursor: pointer; }'+
                         '.sct-del { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAIhIAACISAFlEbUFAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAHNSURBVHja7Ne9axRBGMfxz94diQlnSGN8AQXFQlCxsBUrFQVFUUvFzj9Bi2ssPBDs/BPyBwgBXyE2VloElKigIgFf0EIUVBSJcW2eg2VZs+txG0XuB8sMv5md/c7sM7vzJGmagk6no0QTuIhjWI2fufYGvuEOzuHtcoN1u13QUl1XcKakzyROYS0OVBm0KsAaHI36PKajnkSZYgnHsQf7sB2P+wHYha0xICxiS8wOHuAuxnP3fcX6AEhwEhuxKtqbeI37vwMYx27cQHsZ6NNxlelCgZfiBG4HsEam8WzMrK0+JbiKTjZyexqxchopegU38Rnfo0xreHAbY5grApiPaxQHgzId4NKnsfyfynbBZGyziRpWYCce5b9eRZGarlQwNPxlVQV4F/t3f+xheI4jES/3wpvDIRzGk0ECfMEMZrEQ3kdcC6A3GdBbuI73gwRICupl3v8VA0OAIcAQYAjwzwOkdQMkmWN4K3NvK+c1M2Wz38QkKfipbMLDSMemwtuBpzH7deHtxYuob+gXYBE/CvptznmjkbBkNVbg9bQUY5e+gg94VkO8vcLLqjFwqQaAy5E9V0pOZ+K4dR7bIqD+NNJ7R/GFyKynizr9GgBEeldN2USYxwAAAABJRU5ErkJggg==); }'+
                         '.sct-rel { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAK5SURBVHja7NddiBZlFAfw3+uuxkqmm4U35UUQ5lVgSmxs+UHBstCFERQoiZiC1IVgHwTlshiJiGKKBdnHhQq6GBVIXij4BYsR7na3QqFXoYGw7WZs6+72dnNGhmHed2a2CxH9w8DM85yZ/5nn/J9zzlOr1+vuJGa4w2iF3t7eMrazsBzdWIrH8FDM3cTvGMCPOIOxJt/agr97enoOtpZ08g28g8UNbB7GQnTgLVzBXnyB8YztdmzFN2VC8BTO4asm5Hl4AvvwE55JjW/Dh5iIS7MV6MJRzC0gq6PWYO5pXMAaPInelPZamjnQhe/xQM7cAH7Az/gjHJgfZN14IfPdNvTlOFlr5MAiHMkhHwodnAzSLE5jN5ZgJ17Mij1n5XI18HmIKo0+LAuFFyWOAbyEj0pvwxTWYGUO+esliLN4sGA+NwRvZ55/xcZpkH+GzQXCrWcdmInHM4YfYLQi+ddYX2DzLyazGpjAsdRzf6i9CvYE+Qj+zLlGImuO4p+8ELyP82iPbThZgbwF+7ELUw3C1pIKwVieA5PT+OsEU7h611XD+w4kGpgdqbdW4p3ZuF5RoG1YHfffpXuFxIH3sBaPhJgaoR2HsK7ijx7GK3H/LV7NOjAnKlpR6T2BTRXJV6TIRcVcEJX0tgZaSuihL5ZxvAL5zKiQaVzDcFaE9YJ8/yVeqxj3pCYsyYx9iltVd8FwReJZ4fSbmfFBHJjONnw3WqvnStiuwkVsyIyPhUNTCjqVJK1OxZ8k6Awn+kOMg7gRc49G8/kyns3ZzvXYOQNFDUmCT4KsD/MyK9YZV1mMRVt/vFkmrKW83hXt86no8/v/R6IbjLAdL0rFM2I19kRSSnA5TkMboikti9+iu+rAL2VS8RA+xo4cm8nocg7j+Ugky1JHsxr+iqPZpWhczyYNRxFq9/zp+L8BAOz5m71fnJ1fAAAAAElFTkSuQmCC); }'+
+						'.sct-rel12 { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAK4SURBVHja7NddiBZlFAfw3+vuKit9aUY35kUQ2lWwKbGhfYiBCF4ogoKi2JYQeSFoilCBKEVIiyUVVKsXKuiyooLkhUJpsCjhbncGRV2FBYLtlrx+vNvbzRkZhnnfmdkuROoPAzPPc2b+Z57zf845T63ZbLqXmOIeoxNeHRgoYzsVL2IZ5mM2Hoq5v/ArRvAVvka9zbe24MaBvr4vOks6uR7b8HQLm5mYg168iZ+xD5/jVsZ2N7biYJkQzMN5DLQhz8OT+BiX8Gxq/F28jTtxabcCS3EUDxeQNVFrMfcMvsVaPIVdKe11tHNgKU5iWs7cCE7hO/weDjwaZMvwQua73RjMcbLWyoG5OJJDfiV0cCZIsziHD9GDD7AkK/aclcvVwGchqjQGsSAUXpQ4RvAK3im9DVNYi5dzyNeUIM7igYL53BBszjz/iNcnQf4p3igQbjPrQBeeyBjuxHhF8gPYWGDzNxpZDdzBsdTzcKi9CvqDfAx/5FxjkTXHcTMvBDtwATNiGzYqkHdgP/ZiokXYOlIhqOc50JjEXyeYwC/3XTX834FEA9Mj9dZKvDMdv1UUaDdWxP2JdK+QOLAd6zArxNQKM3AIGyr+6GGsjPvjWJV14MGoaEWl9zQ2VSR/KUUuKubjUUnvaqCjhB4GYxlvVSDvigqZxlVcz4qwWZDvv8TqinFPakJPZuwj3K66C65XJJ4aTr+WGR/FJ5PZhm9Fa/V8CdvFuIi+zHg9HJpQ0KkkaXUi/iTBwnBiOMQ4imsx91g0n8vxXM52bsbOGSlqSBK8F2SDeCSzYgvjKot6tPVD7TJhLeX13mifz0afP/wvEt1ohG2oKBVPidXoj6SU4Ic4DfVFU1oWP0V31Yvvy6TiK9iD93NsGtHlHMaiSCQLUkezGv6Mo9nlaFy/SRqOItT+86fjfwYA+LGbvXXSQ8QAAAAASUVORK5CYII=); }'+
                     '</style>');
-
-                    if (GM_getValue('stats'))
-                        $('#droplist_wrapper').append('<a class="btn btnGold btnRounded sctb2" href="#" id="sct-restat">reload stats</a>');
                 } else {
                     $('<a class="btn btnGold btnRounded sctb" href="/tools" id="sct-sllink">edit droplist</a>').prependTo('#page');
                 }
@@ -116,9 +117,9 @@ function Init(friendMessage, checkBlocked, debug) {
                 // -- Script settings page --
                 if (window.location.href.match(/https:\/\/(\w\w\.|es-mx\.)?socialclub\.rockstargames\.com\/settings\/tools.*/)) {
                     $('.span1col > *').remove();
-                    $('.span1col').append('<div id="sct-settings-main" class="commonPageContainer gridPanel"> <h1>Settings</h1><ul id="primary_settings"> <li> <input type="checkbox" id="debug" class="sct-settings">Debug Mode <span class="orange">*</span><span class="info">Show more info in the console. Mainly for development, but also useful for bug reporting.</span></li><li> <input type="checkbox" id="checkBlocked" class="sct-settings">Check blocked players <span class="orange">*</span><span class="info">If this option is checked, blocked players will be skipped when sending friend requests. Otherwise the player will automatically be unblocked if you quick-add them.</span></li><li> <input type="checkbox" id="stats" class="sct-settings">Check stats <span class="info">Retrieve stats, most notably amount of money, for players, and display it in the droplist.</span></li><li> <input type="checkbox" id="silent" class="sct-settings">Silent mode <span class="orange">*</span><span class="info">Don\'t show any popups/alerts/confirmations. Not recommended.</span></li></ul> <span class="footer">Items with a <span class="orange">*</span> will only take effect once the page is reloaded.</span></div>');
+                    $('.span1col').append('<div id="sct-settings-main" class="commonPageContainer gridPanel"> <h1>Settings</h1><ul id="primary_settings"> <li> <input type="checkbox" id="debug" class="sct-settings">Debug Mode <span class="orange">*</span><span class="info">Show more info in the console. Mainly for development, but also useful for bug reporting.</span></li><li> <input type="checkbox" id="checkBlocked" class="sct-settings">Check blocked players <span class="orange">*</span><span class="info">If this option is checked, blocked players will be skipped when sending friend requests. Otherwise the player will automatically be unblocked if you quick-add them.</span></li><li> <input type="checkbox" id="stats" class="sct-settings">Check stats <span class="info">Retrieve stats, most notably amount of money, for players, and display it in the droplist.</span></li><li> <input type="checkbox" id="silent" class="sct-settings">Silent mode <span class="orange">*</span><span class="info">Don\'t show any popups/alerts/confirmations. Not recommended.</span></li><li> <input type="checkbox" id="limit" class="sct-settings">Personal limit - <input id="limitVal" type="number"><span> mil</span><span class="info">Set a personal limit of how much money is too much for joining your drop.<br><i>This won\'t affect the amount turning red for 500m+ (aka blacklist recommendation.)</i><br>To edit: uncheck the box, change the number, then check it again.</span></li></ul> <span class="footer">Items with a <span class="orange">*</span> will only take effect once the page is reloaded.</span></div>');
                     $('.span1col').append('<div id="sct-settings-buttons" class="commonPageContainer gridPanel"> <h1>Buttons</h1> <span>Enable/disable the buttons at the top. You likely won\'t find all of them to be useful.</span><ul id="button_settings"> <li> <input id="auto" class="sct-settings" type="checkbox">Auto-accept</li><li> <input type="checkbox" id="delete" class="sct-settings">Delete friends / Delete non-dropees</li><li> <input type="checkbox" id="accept" class="sct-settings">Accept requests / Accept dropees</li><li> <input type="checkbox" id="reject" class="sct-settings">Reject requests / Reject non-dropees</li><li> <input type="checkbox" id="quickadd" class="sct-settings">Quick-add user</li><li> <input type="checkbox" id="messages" class="sct-settings">Delete messages</li> <li> <input type="checkbox" id="delete2" class="sct-settings">Delete dropees</li><li> <input type="checkbox" id="settings-link" class="sct-settings">Settings (link to this page)</li> </ul> </div>');
-                    $('head').append('<style>h1 { color:  #fff; } .commonPageContainer.gridPanel { padding: 10px !important; } li { color: #bbb; } span.info { display: block; color: #666; margin-left: 25px; } input.sct-settings {-webkit-appearance: none;width: 16px;height: 16px;background: #333;border: 2px solid #555;margin: 9px 5px 0px 0px;border-radius: 3px;} input.sct-settings:hover { background: #444; border-color: #777; } div#sct-settings-main { width: 59%; float: left; } div#sct-settings-buttons { width: 39%; float: right; } h4 { color: #bbb; } span { color: #bbb; } span.comingSoon { color: #ff6c00; } input.sct-settings:checked { background-image: url(https://www.degoudenton.nl/skin/frontend/default/degoudenton/images/checkmark-orng.png); background-repeat: no-repeat; } input.sct-settings:disabled { background: #000; border-color: #222; pointer-events: none; } input.sct-settings:focus { outline: none; border: 2px solid #555; box-shadow: 0 0 7px 1px rgba(252, 175, 23, 0.5); } span.orange { color: orange; } span.footer { display: block; margin-top: 20px; }</style>');
+                    $('head').append('<style>h1 { color:  #fff; } .commonPageContainer.gridPanel { padding: 10px !important; } li { color: #bbb; } span.info { display: block; color: #666; margin-left: 25px; } input.sct-settings {-webkit-appearance: none;width: 16px;height: 16px;background: #333;border: 2px solid #555;margin: 9px 5px 0px 0px;border-radius: 3px;} input.sct-settings:hover { background: #444; border-color: #777; } div#sct-settings-main { width: 59%; float: left; } div#sct-settings-buttons { width: 39%; float: right; } h4 { color: #bbb; } span { color: #bbb; } span.comingSoon { color: #ff6c00; } input.sct-settings:checked { background-image: url(https://www.degoudenton.nl/skin/frontend/default/degoudenton/images/checkmark-orng.png); background-repeat: no-repeat; } input.sct-settings:disabled { background: #000; border-color: #222; pointer-events: none; } input.sct-settings:focus { outline: none; border: 2px solid #555; box-shadow: 0 0 7px 1px rgba(252, 175, 23, 0.5); } span.orange { color: orange; } span.footer { display: block; margin-top: 20px; } input#limitVal { background:  #444; border:  2px solid #666; color:  #bbb; border-radius: 3px; padding: 0 2px; width: 27px; } input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }</style>');
                 } else {
                     $('#loggedIn ul.dropdown-menu').append('<li><a id="sct-set-link" href="/settings/tools" title="SC Tools Settings" class="logoutlink"><i class="scicon-nav_scts"><style>i.scicon-nav_scts:before { content: "\\f119"; }</style></i>SC Tools Settings</a></li>');
                     if (GM_getValue('sct-settings'))
@@ -140,7 +141,7 @@ function Init(friendMessage, checkBlocked, debug) {
                     GM_setValue(this.id, this.checked);
                     if (idMap[this.id]) {
                         if (this.checked && !document.getElementById(idMap[this.id])) {
-                            if (this.id == 'settings-link')
+							if (this.id == 'settings-link')
                                 $('<a class="btn btnGold btnRounded sctb" href="/settings/tools" id="'+idMap[this.id]+'">settings</a>').prependTo('#page');
                             else if (this.id == 'auto')
                                 $('<a class="btn btnGold btnRounded sctb" href="#" id="'+idMap[this.id]+'">auto-accept <span class="off">[off]</span></a>').prependTo('#page');
@@ -150,25 +151,30 @@ function Init(friendMessage, checkBlocked, debug) {
                             $('#'+idMap[this.id]).remove();
                         }
                         changeText();
-                    }
+                    } else if (this.id == 'limit') {
+						if (!this.checked) {
+							$('#limitVal').val('');
+							return;
+						}
+						var n = parseInt( $('#limitVal').val() );
+						if (!n || isNaN(n) || n > 499 || n < 50) {
+							$('#limit').prop('checked', false);
+							GM_setValue('limit', false);
+							$('#limitVal').val('');
+						} else {
+							GM_setValue('limit', n*1000000);
+							$('#limitVal').val(GM_getValue('limit')/1000000);
+						}
+					}
                 });
                 // set everything to proper value
-                var vList = [
-                    "delete",
-                    "accept",
-                    "reject",
-                    "quickadd",
-                    "messages",
-                    "delete2",
-                    "settings-link",
-                    "debug",
-                    "checkBlocked",
-                    "stats",
-                    "silent",
-                    "auto"
-                ];
+                var vList = ["delete", "accept", "reject", "quickadd", "messages", "delete2", "settings-link", "debug", "checkBlocked", "stats", "silent", "auto"];
                 for (var i in vList)
                     $('#'+vList[i]).prop('checked', GM_getValue(vList[i]));
+				if (GM_getValue('limit')) {
+					$('#limit').prop('checked', true);
+					$('#limitVal').val(GM_getValue('limit')/1000000);
+				}
                 if (GM_getValue('settings-link'))
                     $('<a class="btn btnGold btnRounded sctb" href="/settings/tools" id="sct-settings">settings</a>').prependTo('#page');
 
@@ -186,11 +192,14 @@ function Init(friendMessage, checkBlocked, debug) {
                             $('#current_list').append('<li'+(dl[i].sc == '<span class="unknown">???</span>' ? '' : ' data-sc="'+dl[i].sc+'"')+'> '+
                                  '<span class="gray">SC:</span> '+dl[i].sc+
                                  ' <span class="gray">| Discord:</span> '+dl[i].discord+
-                                 (GM_getValue('stats') ? ' <span class="gray">|</span> 💰 '+dl[i].money : '')+
+                                 (GM_getValue('stats') ? ' <span class="gray">|</span> 💰 '+
+									  (GM_getValue('limit') && dl[i].rawMoney > GM_getValue('limit') ? '<span class="fail">'+dl[i].money+'</span>' : dl[i].money)
+								  : '')+
                                  (GM_getValue('stats') ? ' <span class="gray">|</span> 🌐 '+dl[i].rank : '')+
                                  ' <span class="gray">| Drops:</span> '+dl[i].drops+
                                  '<span class="sctb-16 sct-del"></span>'+
                                  (GM_getValue('stats') ? '<span class="sctb-16 sct-rel"></span>' : '')+
+								 (GM_getValue('stats') && i % 12 == 0 ? '<span class="sctb-16 sct-rel12"></span>' : '')+
                             '</li>');
                             newList.push(dl[i]);
                         }
@@ -285,8 +294,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         //small note - no commas will appear in safari. but fuck safari anyway
 
                                         member.rawMoney = cash + bank;
-
-                                        if (member.rawMoney > 500000000)
+										if (member.rawMoney > 500000000)
                                             member.money = '<span class="bl">'+member.money+'</span>';
 
                                         if (member.rank === 0) {
@@ -391,7 +399,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                   "<i>This should only take a minute if you added a reasonable number of people.</i><br>"+
                                   "<strong id=\"sct-stats-progress\" style=\"font-weight:bold;\"><br><br><span id=\"sct-stats-progress-current\">"+txt.length+"</span> of "+
                                   "<span id=\"sct-stats-progress-total\">"+txt.length+"</span> player(s) remaining...</strong>",
-                        imageUrl: "https://i.imgur.com/ckmgnZ3.gifv",
+                        imageUrl: "https://i.imgur.com/ckmgnZ3.gif",
                         showConfirmButton: false,
                         allowOutsideClick: false
                     });
@@ -480,16 +488,24 @@ function Init(friendMessage, checkBlocked, debug) {
                     $('#droplist_input').val('');
                 });
 
-                $('#droplist-wrapper').on('click', '#sct-restat', function() {
-                    var list = GM_getValue('droplist');
+				$('#current_list').on('click', '.sct-rel12', function() {
+					var ind = $(this).parent().index();
+					var len = $('#current_list > li').length - ind;
+					if (len > 12) len = 12;
+					toggleAuto('pause');
+					console.log(ind +' '+ len);
+					var oldList = GM_getValue('droplist');
+                    var list = oldList.slice(ind, ind+len);
+					console.log(oldList);
+					console.log(list);
                     var n = 0;
-                    var oldSCList = list.map(e => { return e.sc; });
+                    //var oldSCList = list.map(e => { return e.sc; });
 
                     function memberDone(member) {
                         n++;
                         $('#sct-stats-progress-current').text(list.length - n);
 
-                        list[n-1] = member;
+                        oldList[n + ind - 1] = member;
 
                         if (n == list.length-1) {//done with reqs
                             swal({
@@ -499,8 +515,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                 showConfirmButton: false,
                                 timer: 1000
                             });
+							toggleAuto('unpause');
 
-                            refresh(list);
+                            refresh(oldList);
                         }
                     }
 
@@ -511,7 +528,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                   "<i>This should only take a minute if you added a reasonable number of people.</i><br>"+
                                   "<strong id=\"sct-stats-progress\" style=\"font-weight:bold;\"><br><br><span id=\"sct-stats-progress-current\">"+list.length+"</span> of "+
                                   "<span id=\"sct-stats-progress-total\">"+list.length+"</span> player(s) remaining...</strong>",
-                        imageUrl: "https://i.imgur.com/ckmgnZ3.gifv",
+                        imageUrl: "https://i.imgur.com/ckmgnZ3.gif",
                         showConfirmButton: false,
                         allowOutsideClick: false
                     });
@@ -519,7 +536,7 @@ function Init(friendMessage, checkBlocked, debug) {
                     for (var i in list) {
                         var member = list[i];
                         if (member.sc !== '<span class="unknown">???</span>') {
-                            getStats(member, memberDone, 2000*i);
+                            getStats(member, memberDone, 1000*i);
                         }
                         else memberDone(member);
                     }
