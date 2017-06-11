@@ -14,7 +14,7 @@ You need to install an extension that allows you to use userscripts. They're wid
 
 ### Installation
 ##### *For Chrome:*
-Click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js) or find `SC-Tools-FF.user.js` in this repository and click `Raw`.
+Click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js) or find `SC-Tools.user.js` in this repository and click `Raw`.
 
 ##### *For Firefox:*
 Click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools-FF.user.js) or find `SC-Tools-FF.user.js` in this repository and click `Raw`.
