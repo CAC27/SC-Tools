@@ -1,25 +1,21 @@
 # SC-Tools
 
-*What's this?* It's a script adding tools to accept/reject friend requests, delete friends, and more. If you choose to provide a list of people you're dropping, it will be smart in keeping uninvited guests out and accepting your dropees quickly.
-
-### First and foremost
-You need to install an extension that allows you to use userscripts. They're widely available:
-* Chrome: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=chrome) or [NinjaKit](https://chrome.google.com/webstore/detail/gpbepnljaakggeobkclonlkhbdgccfek)
-* Firefox: [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)
-* Edge: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=edge) 
-* Safari: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=safari) or [NinjaKit](http://ss-o.net/safari/extension/NinjaKit.safariextz)
-* Opera: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=opera) or [Violent Monkey](https://addons.opera.com/en/extensions/details/violent-monkey/)
-* Dolphin: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=dolphin)
-* UC Browser: [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=ucweb)
+*What's this?* It's a script adding tools to the [Social Club website](https://socialclub.rockstargames.com/) for accepting/rejecting friend requests, deleting friends, and more. If you choose to provide a list of people you're dropping, it will be smart in keeping uninvited guests out and accepting your dropees quickly.
 
 ### Installation
 ##### *For Chrome:*
-Click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js) or find `SC-Tools.user.js` in this repository and click `Raw`.
+First install [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=chrome). It's a userscript manager with some security features built-in (so that scripts like this can't damage your PC.)
 
-##### *For Firefox:*
-Click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools-FF.user.js) or find `SC-Tools-FF.user.js` in this repository and click `Raw`.
+Then click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js) or find `SC-Tools.user.js` in this repository and click `Raw`.
 
-*Note: The auto-accept features will not be added to Firefox version anytime soon as it's proving extremely difficult to make it work with FF at all. I would highly recommend just using Chrome.*
+##### ~~*For Firefox:*~~
+~~First install [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/). It's a userscript manager with some security features built-in (so that scripts like this can't damage your PC.)~~
+
+~~Then click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools-FF.user.js) or find `SC-Tools-FF.user.js` in this repository and click `Raw`.~~
+
+*Firefox just doesn't work with this script at all. It appears there's no simple fix so you might as well use Chrome for the time being.*
+##### *Other browsers*
+If you can manage to use Tampermonkey and install this on another browser, good for you ¯\\_(ツ)_/¯
 
 ### About stats
 * Yellow question marks mean stats are hidden by the player.
@@ -29,6 +25,7 @@ Click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools-FF.user.js) o
 * Money amount *(which includes bank + wallet)* will automatically turn red if it's >500m.
 
 ### More info
+* `Auto-accept` works the same way as the normal accept button: accepts dropees if you have a droplist or all requests if you don't.
 * When adding to the droplist: if stat checking is enabled, only the first 15 are added. Just wait 30 seconds or so before adding the rest.
 * Looped requests (accept *all*, delete *all*, etc.) are done once per second because rate limits.
 * After accepting friends from the droplist, it's advisable to reload stats as many players set their privacy settings to only share stats with friends.
