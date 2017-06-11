@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         SC Tools
-// @version      1.0.2
+// @version      1.3
 // @description  Useful tools for dropping.
 // @author       CAC
 // @downloadURL  https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js
@@ -9,7 +9,6 @@
 // @match        https://*.socialclub.rockstargames.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
-// @grant        GM_deleteValue
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // ==/UserScript==
 
@@ -18,6 +17,7 @@ var baseURL = window.location.href.match(/^(https:\/\/(\w\w\.|es-mx\.)?socialclu
 
 // SC regex: /^[a-z.A-Z_\d]{6,16}$/
 
+// -- Set default values if first run of script --
 if (GM_getValue('checkBlocked') === undefined) {
     GM_setValue('checkBlocked', false);
 }
@@ -30,100 +30,77 @@ if (GM_getValue('droplist') === undefined) {
 if (GM_getValue('stats') === undefined) {
     GM_setValue('stats', true);
 }
+if (GM_getValue('delete') === undefined) {
+    GM_setValue('delete', true);
+}
+if (GM_getValue('accept') === undefined) {
+    GM_setValue('accept', true);
+}
+if (GM_getValue('reject') === undefined) {
+    GM_setValue('reject', true);
+}
+if (GM_getValue('quickadd') === undefined) {
+    GM_setValue('quickadd', true);
+}
+if (GM_getValue('messages') === undefined) {
+    GM_setValue('messages', true);
+}
+if (GM_getValue('settings-link') === undefined) {
+    GM_setValue('settings-link', false);
+}
+if (GM_getValue('silent') === undefined) {
+    GM_setValue('silent', false);
+}
+if (GM_getValue('delete2') === undefined) {
+    GM_setValue('delete2', false);
+}
+if (GM_getValue('auto') === undefined) {
+    GM_setValue('auto', true);
+}
 
+var auto = false;
+var autoPaused = false;
+
+// Friend message discarded here as it seemed unnecessary. Could re-add in future.
 Init('', GM_getValue('checkBlocked'), GM_getValue('debug'));
-
 function Init(friendMessage, checkBlocked, debug) {
-	var isReloaded = false;
 
 	try {
-		if (!document.getElementById("sct-sacss")) {
-			var sacss = document.createElement('link');
-			sacss.id = "sct-sacss";
-			sacss.rel = "stylesheet";
-			sacss.href = "https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css";
-			document.getElementsByTagName('head')[0].appendChild(sacss);
-		} else {
-			isReloaded = true;
-			if (debug) console.log("SweetAlert CSS was already present.");
-		}
-
-        if (!document.getElementById("sct-sajs")) {
-			var sajs = document.createElement('script');
-			sajs.id = "sct-sajs";
-			sajs.src = "https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js";
-			document.getElementsByTagName('head')[0].appendChild(sajs);
-		} else {
-			isReloaded = true;
-			if (debug) console.log("SweetAlert JS was already present.");
-		}
+        if (GM_getValue('silent')) { //replace sweetalert w/ dummy function
+            window.swal = function(options, callback) {
+                if (callback) {
+                    callback(true);
+                }
+            };
+        } else {
+            $('head').append('<link id="sct-sacss" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css"></link>');
+            $('head').append('<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>');
+        }
 	} catch (err) {
 		console.error("Error during script loader:\n\n"+err.stack);
 		return;
 	}
 
 	setTimeout(function () {
-//OLD STUFF
         try {
-            try {
-                var verificationToken = siteMaster.aft.replace('<input name="__RequestVerificationToken" type="hidden" value="', '').replace('" />', '').trim();
-                var userNickname = siteMaster.authUserNickName;
-                var isLoggedIn = siteMaster.isLoggedIn;
+            try { //unsafeWindow = compatibility with FF 👌
+                var verificationToken = unsafeWindow.siteMaster.aft.replace('<input name="__RequestVerificationToken" type="hidden" value="', '').replace('" />', '').trim();
+                var userNickname = unsafeWindow.siteMaster.authUserNickName;
+                var isLoggedIn = unsafeWindow.siteMaster.isLoggedIn;
             } catch (err) {
                 console.error("Error retrieving account data:\n\n"+err.stack);
                 return;
             }
 
-            if (userNickname !== "" && isLoggedIn) {
-                if (!document.getElementById("sct-cred")) {
-                    $('<li id="sct-cred">Social Club tool by <a href="https://github.com/CAC27" target="_blank">CAC</a>, '+
-                      'based on the tool by <a href="https://github.com/Nadermane" target="_blank">Nadermane</a>'+(debug ? " (debug mode)" : "")+'</li>').appendTo('#footerNav');
-                } else {
-                    $("#sct-cred").remove();
-                    $('<li id="sct-cred">Social Club tool by <a href="https://github.com/CAC27" target="_blank">CAC</a>, '+
-                      'based on the tool by <a href="https://github.com/Nadermane" target="_blank">Nadermane</a>'+(debug ? " (debug mode)" : "")+'</li>').appendTo('#footerNav');
-                    isReloaded = true;
-                    if (debug) console.log("#sct-cred was already present.");
-                }
-                
-// NEW STUFF - settings in dropdown
-                $('#loggedIn ul.dropdown-menu').append('<li>'+
-                    '<a target="_blank"><input type="checkbox" id="debugToggle" class="SCTools">Debug Mode</a>'+
-                '</li><li>'+
-                    '<a target="_blank"><input type="checkbox" id="checkBlocked" class="SCTools">Check blocked players</a>'+
-                '</li><li>'+
-                    '<a target="_blank"><input type="checkbox" id="statsToggle" class="SCTools">Check stats</a>'+
-                '</li>');
-                $('head').append('<style id="sct_style">.sctb { margin-bottom: 8px; margin-right: 5px; } input[type="checkbox"].SCTools { -webkit-appearance: none; width: 16px; height: 16px; background: #CCC; border: 2px solid #BBB; margin: -10px 6px 9px -1px;}a:hover > input[type="checkbox"].SCTools { -webkit-appearance: none; width: 16px; height: 16px; background-color: #DDD; border: 2px solid #CCC; margin: -10px 6px 9px -1px;}input.SCTools[type="checkbox"]:checked { background-image: url(https://www.degoudenton.nl/skin/frontend/default/degoudenton/images/checkmark-orng.png);}</style>');
+            if (userNickname !== '' && isLoggedIn) {
+                $('<li id="sct-cred">Social Club tool by <a href="https://github.com/CAC27" target="_blank">CAC</a>, '+
+                  'based on the tool by <a href="https://github.com/Nadermane" target="_blank">Nadermane</a>'+(debug ? " (debug mode)" : "")+'</li>').appendTo('#footerNav');
 
-                //show correct values
-                $('#debugToggle').prop('checked', debug);
-                $('#checkBlocked').prop('checked', checkBlocked);
-                $('#statsToggle').prop('checked', GM_getValue('stats'));
+                // -- Main style --
+                $('head').append('<style id="sct_style">.sctb { margin-bottom: 8px; margin-right: 5px; } input[type="checkbox"].SCTools { -webkit-appearance: none; width: 16px; height: 16px; background: #CCC; border: 2px solid #BBB; margin: -10px 6px 9px -1px;}a:hover > input[type="checkbox"].SCTools { -webkit-appearance: none; width: 16px; height: 16px; background-color: #DDD; border: 2px solid #CCC; margin: -10px 6px 9px -1px;}input.SCTools[type="checkbox"]:checked { background-image: url(https://www.degoudenton.nl/skin/frontend/default/degoudenton/images/checkmark-orng.png);} span.off { color: red; } span.on { color: green; } span.paused { color: brown; }</style>');
 
-                // functionality for the above
-                $('#debugToggle').change(function() {
-                    debug = this.checked;
-                    GM_setValue('debug', this.checked);
-                });
-                $('#checkBlocked').change(function() {
-                    checkBlocked = this.checked;
-                    GM_setValue('checkBlocked', this.checked);
-                });
-                $('#statsToggle').change(function() {
-                    GM_setValue('stats', this.checked);
-                    if (!this.checked) {
-                        $('#sct-restat').remove();
-                        $('#sct-rel').remove();
-                    }
-                    else if (window.location.href.match(/https:\/\/(\w\w\.)?socialclub\.rockstargames\.com\/tools.*/))
-                        $('#droplist_wrapper').append('<a class="btn btnGold btnRounded sctb2" href="#" id="sct-restat">reload stats</a>');
-                    refresh();
-                });
-
-                
-//NEW STUFF - droplist
-                if (window.location.href.match(/https:\/\/(\w\w\.)?socialclub\.rockstargames\.com\/tools.*/)) {
+                // -- Droplist page --
+                if (window.location.href.match(/https:\/\/(\w\w\.|es-mx\.)?socialclub\.rockstargames\.com\/tools.*/)) {
                     $('.alertBox.notFound').replaceWith('<div id="sctools"><div id="droplist" class="activePanel"> <div class="gridPanel sct" id="droplist_info"> <h3 class="sct">Edit Droplist</h3> <p class="sct">This is designed to accept dropBot messages:<br><br> <b>Discord Name:</b> someName <b>ID:</b> 1234567890 - <b>SC:</b> socialClubName - <b>Drops Attended:</b> x<br><i>(one dropee per line)</i> <br><br>So just directly copy and paste them. <br><br>Note that the button functions change if you have a droplist. </p> <div id="droplist_input_wrapper"> <textarea id="droplist_input" placeholder="Discord: CAC - SC: ¯\\_(ツ)_/¯ - Drops attended: 19\nDiscord: YellowHeart - SC: 🤔 - Drops Attended: 70"></textarea> <a class="btn btnGold btnrounded sctb2" href="#" id="sct-add">add</a> <a class="btn btnGold btnRounded sctb2" href="#" id="sct-remove">remove</a> </div></div><div class="gridPanel sct" id="current_droplist"> <h3 class="sct">Current Droplist</h3> <p class="sct">This is a list of your dropees, including some info about them.<br><br>It will be in the format:<br>SC name | Discord name | Total money | Rank | Drops attended.<br><br><i>Note: Stats (rank/cash) will be unavailable for some players, due to privacy settings.</i> </p> <div id="droplist_wrapper"> <ul id="current_list">   <li class="empty">Tumbleweeds...</li> </ul> <a class="btn btnGold btnrounded sctb2" href="#" id="sct-clear">clear</a></div></div></div></div>');
                     $('head').append('<style id="sctools_style">h3.sct { color: white; padding: 5px; } p.sct { color: #bbb; padding: 10px; } textarea#droplist_input { color: #fff; width: 99%; min-height: 300px; margin: 5px; background: #222; padding:  5px; border: 2px solid #444; border-radius: 10px; } a.btn.btngold.btnrounded.sctb2 { margin: 5px; } .gridPanel.sct { padding: 10px !important; } div#current_droplist { float: right; width: 59%; } div#droplist_info { float: left; width: 39%; } .empty, .gray { color: #666; } ul#current_list { color: #fff; background: #222; padding: 10px; margin: 5px; } #current_list li { padding:  5px; border-bottom: 2px solid #666; } .unknown { color: #FB0; } .bl { color: #F00; } .fail { color: #F70 } /*.rank { background: url(/images/games/GTAV/player-rank.png) no-repeat; background-size: 30px; padding: 4px 3px; }*/ .sctb-16 { float: right; height: 16px; width: 16px; background-size: 16px; display: inline-block; transition: 150ms; } .sctb-16:hover { filter: brightness(1.5); cursor: pointer; }'+
                         '.sct-del { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAIhIAACISAFlEbUFAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAHNSURBVHja7Ne9axRBGMfxz94diQlnSGN8AQXFQlCxsBUrFQVFUUvFzj9Bi2ssPBDs/BPyBwgBXyE2VloElKigIgFf0EIUVBSJcW2eg2VZs+txG0XuB8sMv5md/c7sM7vzJGmagk6no0QTuIhjWI2fufYGvuEOzuHtcoN1u13QUl1XcKakzyROYS0OVBm0KsAaHI36PKajnkSZYgnHsQf7sB2P+wHYha0xICxiS8wOHuAuxnP3fcX6AEhwEhuxKtqbeI37vwMYx27cQHsZ6NNxlelCgZfiBG4HsEam8WzMrK0+JbiKTjZyexqxchopegU38Rnfo0xreHAbY5grApiPaxQHgzId4NKnsfyfynbBZGyziRpWYCce5b9eRZGarlQwNPxlVQV4F/t3f+xheI4jES/3wpvDIRzGk0ECfMEMZrEQ3kdcC6A3GdBbuI73gwRICupl3v8VA0OAIcAQYAjwzwOkdQMkmWN4K3NvK+c1M2Wz38QkKfipbMLDSMemwtuBpzH7deHtxYuob+gXYBE/CvptznmjkbBkNVbg9bQUY5e+gg94VkO8vcLLqjFwqQaAy5E9V0pOZ+K4dR7bIqD+NNJ7R/GFyKynizr9GgBEeldN2USYxwAAAABJRU5ErkJggg==); }'+
@@ -133,17 +110,72 @@ function Init(friendMessage, checkBlocked, debug) {
                     if (GM_getValue('stats'))
                         $('#droplist_wrapper').append('<a class="btn btnGold btnRounded sctb2" href="#" id="sct-restat">reload stats</a>');
                 } else {
-                    if (!document.getElementById("sct-dllink")) {
-                        $('<a class="btn btnGold btnRounded sctb" href="/tools" id="sct-sllink">edit droplist</a>').prependTo('#page');
-                    } else {
-                        $("#sct-dllink").remove();
-                        $('<a class="btn btnGold btnRounded sctb" href="/tools" id="sct-dllink">edit droplist</a>').prependTo('#page');
-                        isReloaded = true;
-                        if (debug) console.log("#sct-dllink was already present.");
-                    }
+                    $('<a class="btn btnGold btnRounded sctb" href="/tools" id="sct-sllink">edit droplist</a>').prependTo('#page');
                 }
 
-                setTimeout(refresh, 200);
+                // -- Script settings page --
+                if (window.location.href.match(/https:\/\/(\w\w\.|es-mx\.)?socialclub\.rockstargames\.com\/settings\/tools.*/)) {
+                    $('.span1col > *').remove();
+                    $('.span1col').append('<div id="sct-settings-main" class="commonPageContainer gridPanel"> <h1>Settings</h1><ul id="primary_settings"> <li> <input type="checkbox" id="debug" class="sct-settings">Debug Mode <span class="orange">*</span><span class="info">Show more info in the console. Mainly for development, but also useful for bug reporting.</span></li><li> <input type="checkbox" id="checkBlocked" class="sct-settings">Check blocked players <span class="orange">*</span><span class="info">If this option is checked, blocked players will be skipped when sending friend requests. Otherwise the player will automatically be unblocked if you quick-add them.</span></li><li> <input type="checkbox" id="stats" class="sct-settings">Check stats <span class="info">Retrieve stats, most notably amount of money, for players, and display it in the droplist.</span></li><li> <input type="checkbox" id="silent" class="sct-settings">Silent mode <span class="orange">*</span><span class="info">Don\'t show any popups/alerts/confirmations. Not recommended.</span></li></ul> <span class="footer">Items with a <span class="orange">*</span> will only take effect once the page is reloaded.</span></div>');
+                    $('.span1col').append('<div id="sct-settings-buttons" class="commonPageContainer gridPanel"> <h1>Buttons</h1> <span>Enable/disable the buttons at the top. You likely won\'t find all of them to be useful.</span><ul id="button_settings"> <li> <input id="auto" class="sct-settings" type="checkbox">Auto-accept</li><li> <input type="checkbox" id="delete" class="sct-settings">Delete friends / Delete non-dropees</li><li> <input type="checkbox" id="accept" class="sct-settings">Accept requests / Accept dropees</li><li> <input type="checkbox" id="reject" class="sct-settings">Reject requests / Reject non-dropees</li><li> <input type="checkbox" id="quickadd" class="sct-settings">Quick-add user</li><li> <input type="checkbox" id="messages" class="sct-settings">Delete messages</li> <li> <input type="checkbox" id="delete2" class="sct-settings">Delete dropees</li><li> <input type="checkbox" id="settings-link" class="sct-settings">Settings (link to this page)</li> </ul> </div>');
+                    $('head').append('<style>h1 { color:  #fff; } .commonPageContainer.gridPanel { padding: 10px !important; } li { color: #bbb; } span.info { display: block; color: #666; margin-left: 25px; } input.sct-settings {-webkit-appearance: none;width: 16px;height: 16px;background: #333;border: 2px solid #555;margin: 9px 5px 0px 0px;border-radius: 3px;} input.sct-settings:hover { background: #444; border-color: #777; } div#sct-settings-main { width: 59%; float: left; } div#sct-settings-buttons { width: 39%; float: right; } h4 { color: #bbb; } span { color: #bbb; } span.comingSoon { color: #ff6c00; } input.sct-settings:checked { background-image: url(https://www.degoudenton.nl/skin/frontend/default/degoudenton/images/checkmark-orng.png); background-repeat: no-repeat; } input.sct-settings:disabled { background: #000; border-color: #222; pointer-events: none; } input.sct-settings:focus { outline: none; border: 2px solid #555; box-shadow: 0 0 7px 1px rgba(252, 175, 23, 0.5); } span.orange { color: orange; } span.footer { display: block; margin-top: 20px; }</style>');
+                } else {
+                    $('#loggedIn ul.dropdown-menu').append('<li><a id="sct-set-link" href="/settings/tools" title="SC Tools Settings" class="logoutlink"><i class="scicon-nav_scts"><style>i.scicon-nav_scts:before { content: "\\f119"; }</style></i>SC Tools Settings</a></li>');
+                    if (GM_getValue('sct-settings'))
+                        $('<a class="btn btnGold btnRounded sctb" href="/settings/tools" id="sct-settings">settings</a>').prependTo('#page');
+                }
+                $('#page').on('click', '.sct-settings', function() {
+                    //if ( $(this).has('.comingSoon') ) return;
+                    if (this.id == 'auto') toggleAuto();
+                    var idMap = {
+                        "auto": "sct-auto",
+                        "delete": "sct-delfrd",
+                        "accept": "sct-accreq",
+                        "reject": "sct-rejreq",
+                        "quickadd": "sct-qckadd",
+                        "messages": "sct-delmsg",
+                        "delete2": "sct-deldrp",
+                        "settings-link": "sct-settings"
+                    };
+                    GM_setValue(this.id, this.checked);
+                    if (idMap[this.id]) {
+                        if (this.checked && !document.getElementById(idMap[this.id])) {
+                            if (this.id == 'settings-link')
+                                $('<a class="btn btnGold btnRounded sctb" href="/settings/tools" id="'+idMap[this.id]+'">settings</a>').prependTo('#page');
+                            else if (this.id == 'auto')
+                                $('<a class="btn btnGold btnRounded sctb" href="#" id="'+idMap[this.id]+'">auto-accept <span class="off">[off]</span></a>').prependTo('#page');
+                            else if (this.id !== 'delete2' || isDL())
+                                $('<a class="btn btnGold btnRounded sctb" href="#" id="'+idMap[this.id]+'">'+$(this).parent().text()+'</a>').prependTo('#page');
+                        } else if (document.getElementById(idMap[this.id])) {
+                            $('#'+idMap[this.id]).remove();
+                        }
+                        changeText();
+                    }
+                });
+                // set everything to proper value
+                var vList = [
+                    "delete",
+                    "accept",
+                    "reject",
+                    "quickadd",
+                    "messages",
+                    "delete2",
+                    "settings-link",
+                    "debug",
+                    "checkBlocked",
+                    "stats",
+                    "silent",
+                    "auto"
+                ];
+                for (var i in vList)
+                    $('#'+vList[i]).prop('checked', GM_getValue(vList[i]));
+                if (GM_getValue('settings-link'))
+                    $('<a class="btn btnGold btnRounded sctb" href="/settings/tools" id="sct-settings">settings</a>').prependTo('#page');
+
+                // - Show droplist + change buttons if necessary -
+                setTimeout(refresh, 50);
+
+                // -- Functions to be used throughout script --
                 function refresh(dl) {
                     if(!dl) dl = GM_getValue('droplist');
                     $('#current_list > li').remove();
@@ -169,30 +201,30 @@ function Init(friendMessage, checkBlocked, debug) {
                     }
                     changeText();
                 }
-                
+
                 function isDL() {
                     return GM_getValue('droplist') && GM_getValue('droplist').length > 0;
                 }
-                
+
                 function isOnDroplist(sc) {
                     var dl = GM_getValue('droplist').map(e => { return e.sc.toLowerCase(); });
                     sc = sc.toLowerCase();
                     //if (debug) console.log('Checking if '+sc+' is on this list: \n'+dl);
                     return dl.indexOf(sc) > -1;
                 }
-                
+
                 function changeText() { //changes button/dialog text to match the context
                     if (isDL()) {
                         $('#sct-delfrd').text('delete non-dropees');
-                        $('#sct-accfrd').text('accept all dropees');
+                        $('#sct-accreq').text('accept all dropees');
                         $('#sct-rejreq').text('reject non-dropees');
                     } else {
                         $('#sct-delfrd').text('delete friends');
-                        $('#sct-accfrd').text('accept requests');
+                        $('#sct-accreq').text('accept requests');
                         $('#sct-rejreq').text('reject requests');
                     }
                 }
-                
+
                 function getStats(member, callback, delay) {
                     if (member.sc == '<span class="unknown">???</span>') {
                         console.warn('This person doesn\'t have a social club name saved, so no stats.');
@@ -254,10 +286,10 @@ function Init(friendMessage, checkBlocked, debug) {
 
                                         member.rawMoney = cash + bank;
 
-                                        if (member.rawMoney > 300000000)
+                                        if (member.rawMoney > 500000000)
                                             member.money = '<span class="bl">'+member.money+'</span>';
 
-                                        if (member.rank == 0) {
+                                        if (member.rank === 0) {
                                             member.rank = '<span class="fail">???</span>';
                                             member.money = '<span class="fail">???</span>';
                                         }
@@ -273,20 +305,53 @@ function Init(friendMessage, checkBlocked, debug) {
                         }
                     }, delay);
                 }
-                
+
+                function toggleAuto(state) { //can disable from any call, only enabled with timeout ID
+                    if (state === undefined) {
+                        state = false;
+					} else if (state == 'pause') {
+                        if (auto) {
+							autoPaused = true;
+							$('#sct-auto > span').replaceWith('<span class="paused">[paused]</span>');
+						}
+                        return;
+                    } else if (state == 'unpause') {
+						if (auto) {
+							autoPaused = false;
+							$('#sct-auto > span').replaceWith('<span class="on">[on]</span>');
+						}
+                        return;
+                    }
+                    if ( (!GM_getValue('auto') && !auto) || state === auto )
+                        return false;
+                    if (!auto && state) {
+                       auto = state;
+                    }
+                    else if (auto && !state) {
+                        clearInterval(auto);
+                        auto = false;
+						autoPaused = false;
+                    }
+                    if (auto) $('#sct-auto > span').replaceWith('<span class="on">[on]</span>');
+                    else $('#sct-auto > span').replaceWith('<span class="off">[off]</span>');
+                    // else they are the same, don't change
+                }
+
+                // -- Droplist functions --
                 $('#sct-clear').click(function() {
                     refresh([]);
                 });
-                
+
                 $('#sct-add').click(function() {
+                    toggleAuto('pause');
                     var txt = $('#droplist_input').val();
                     $('#droplist_input').val('');
                     txt = txt.split('\n');
                     var leftovers = false;
                     var l = false;
-                    if (txt.length > 15 && GM_getValue('stats')) {
+                    if (txt.length > 12 && GM_getValue('stats')) {
                         l = true;
-                        leftovers = txt.splice(15, txt.length - 15);
+                        leftovers = txt.splice(12, txt.length - 12);
                     }
                     var newList = GM_getValue('droplist');
                     var n = 0;
@@ -299,19 +364,25 @@ function Init(friendMessage, checkBlocked, debug) {
                             newList.push(member);
 
                         if (n == txt.length) {//done with reqs
-                            if (GM_getValue('stats'))
-                            swal({
+                            if (GM_getValue('stats') && l) swal({
+                                title: "Whoa, slow down there.",
+                                text: "You'll need to wait about 20 seconds to add more people, otherwise stats won't work because rate limits.",
+                                type: "warning",
+                                showConfirmButton: true,
+                                timer: 5000
+                            });
+                            else swal({
                                 title: "Finished!",
                                 text: "Finished retrieving player stats.",
                                 type: "success",
                                 showConfirmButton: false,
                                 timer: 1000
-                              });
-
+                            });
+                            toggleAuto('unpause');
                             refresh(newList);
                         }
                     }
-                    
+
                     if (GM_getValue('stats'))
                     swal({
                         title: "Getting stats...",
@@ -320,7 +391,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                   "<i>This should only take a minute if you added a reasonable number of people.</i><br>"+
                                   "<strong id=\"sct-stats-progress\" style=\"font-weight:bold;\"><br><br><span id=\"sct-stats-progress-current\">"+txt.length+"</span> of "+
                                   "<span id=\"sct-stats-progress-total\">"+txt.length+"</span> player(s) remaining...</strong>",
-                        imageUrl: "http://3.bp.blogspot.com/-xS5R6lFuzSU/VO8gEhp-gdI/AAAAAAAACyA/ou7QLt502yY/s1600/c7a445575f01571e8dfbd72603689dcd.jpg.gif",
+                        imageUrl: "https://i.imgur.com/ckmgnZ3.gifv",
                         showConfirmButton: false,
                         allowOutsideClick: false
                     });
@@ -347,10 +418,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                         if (temp.indexOf(' - Drops Attended: ') !== -1)
                             member.drops = temp[temp.indexOf(' - Drops Attended: ') + 1];
-                        
-                        //console.log(member); continue;
 
-// BETA: Retrieve stats (if script setting allows for it)
                         if (GM_getValue('stats') && member.sc !== '<span class="unknown">???</span>') {
                             //check for dupe by SC
                             if (isOnDroplist(member.sc)) {
@@ -360,8 +428,8 @@ function Init(friendMessage, checkBlocked, debug) {
                                 if (n == txt.length) {//done with reqs (only used here when last is a dupe)
                                     if (l) swal({
                                         title: "Whoa, slow down there.",
-                                        text: "You'll need to wait for at least 30 seconds to add more people, otherwise stats won't work because rate limits.",
-                                        type: "warn",
+                                        text: "You'll need to wait about 30 seconds to add more people, otherwise stats won't work because rate limits.",
+                                        type: "warning",
                                         showConfirmButton: true,
                                         timer: 5000
                                     });
@@ -371,9 +439,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                         type: "success",
                                         showConfirmButton: false,
                                         timer: 1000
-                                      });
-
-                                    refresh(newList);
+                                    });
+                                    toggleAuto('unpause');
+									refresh(newList);
                                 }
                                 continue;
                             }
@@ -387,7 +455,7 @@ function Init(friendMessage, checkBlocked, debug) {
                         $('#droplist_input').val(leftovers.join('\n'));
                     }
                 });
-                
+
                 $('#sct-remove').click(function() {
                     var txt = $('#droplist_input').val();
                     txt = txt.split('\n');
@@ -411,9 +479,8 @@ function Init(friendMessage, checkBlocked, debug) {
                     refresh(list);
                     $('#droplist_input').val('');
                 });
-                
-// NEW STUFF: Refresh stats for whole list
-                $('#sct-restat').click(function() {
+
+                $('#droplist-wrapper').on('click', '#sct-restat', function() {
                     var list = GM_getValue('droplist');
                     var n = 0;
                     var oldSCList = list.map(e => { return e.sc; });
@@ -436,7 +503,7 @@ function Init(friendMessage, checkBlocked, debug) {
                             refresh(list);
                         }
                     }
-                    
+
                     swal({
                         title: "Getting stats...",
                         html: true,
@@ -444,7 +511,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                   "<i>This should only take a minute if you added a reasonable number of people.</i><br>"+
                                   "<strong id=\"sct-stats-progress\" style=\"font-weight:bold;\"><br><br><span id=\"sct-stats-progress-current\">"+list.length+"</span> of "+
                                   "<span id=\"sct-stats-progress-total\">"+list.length+"</span> player(s) remaining...</strong>",
-                        imageUrl: "http://3.bp.blogspot.com/-xS5R6lFuzSU/VO8gEhp-gdI/AAAAAAAACyA/ou7QLt502yY/s1600/c7a445575f01571e8dfbd72603689dcd.jpg.gif",
+                        imageUrl: "https://i.imgur.com/ckmgnZ3.gifv",
                         showConfirmButton: false,
                         allowOutsideClick: false
                     });
@@ -452,32 +519,13 @@ function Init(friendMessage, checkBlocked, debug) {
                     for (var i in list) {
                         var member = list[i];
                         if (member.sc !== '<span class="unknown">???</span>') {
-                            //check for dupe by SC
-                            /*if (oldSCList.indexOf(member.sc) !== -1) {
-                                n++;
-                                console.log('Duplicate dropee skipped.');
-
-                                if (n == list.length) {//done with reqs (only used here when last is a dupe)
-                                    swal({
-                                        title: "Finished!",
-                                        text: "Finished retrieving player stats.",
-                                        type: "success",
-                                        showConfirmButton: false,
-                                        timer: 1000
-                                      });
-
-                                    refresh(list);
-                                }
-                                continue;
-                            }*/
-                            var time = 2000 * i; //+ 4000 * Math.floor(10 - (i % 10));
-
-                            getStats(member, memberDone, time);
+                            getStats(member, memberDone, 2000*i);
                         }
                         else memberDone(member);
                     }
                 });
-                
+
+                // use .on() here because contents matching the selector change
                 $('#current_list').on('click', '.sct-rel', function() {
                     var list = GM_getValue('droplist');
                     var sc = $(this).parent().attr('data-sc');
@@ -495,7 +543,7 @@ function Init(friendMessage, checkBlocked, debug) {
                     }
                     getStats(list[i], done, 0);
                 });
-                
+
                 $('#current_list').on('click', '.sct-del', function() {
                     var list = GM_getValue('droplist');
                     var i = $(this).parent().index();
@@ -508,18 +556,13 @@ function Init(friendMessage, checkBlocked, debug) {
                         refresh(list);
                     }
                 });
-                
-// old stuff
-                if (!document.getElementById("sct-delmsg")) {
-                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-delmsg">delete messages</a>').prependTo('#page');
-                } else {
-                    $("#sct-delmsg").remove();
-                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-delmsg">delete messages</a>').prependTo('#page');
-                    isReloaded = true;
-                    if (debug) console.log("#sct-delmsg was already present.");
-                }
 
-                $("#sct-delmsg").click(function(e) {
+                // -- Main functions --
+                // - Delete messages
+                if (GM_getValue('messages')) {
+                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-delmsg">delete messages</a>').prependTo('#page');
+                }
+                $('#page').on('click', '#sct-delmsg', function(e) {
                     e.preventDefault();
 
                     try {
@@ -540,8 +583,9 @@ function Init(friendMessage, checkBlocked, debug) {
                             title: "Are you sure?",
                             type: "warning",
                         },
-                        function(isConfirm){
+                        function(isConfirm) {
                             if (isConfirm) {
+								toggleAuto('pause');
                                 $.ajax({
                                     url: baseURL+"/Message/GetMessageCount",
                                     headers: {
@@ -558,7 +602,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(err);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
                                         swal({
                                             allowOutsideClick: true,
@@ -566,7 +610,8 @@ function Init(friendMessage, checkBlocked, debug) {
                                             title: err.status+" - "+err.statusText,
                                             timer: 5000,
                                             type: "error",
-                                        });	
+                                        });
+                                        toggleAuto('unpause');
                                     },
                                     success: function(data){
                                         if (debug) {
@@ -578,7 +623,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(data);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
                                         if (data.Total > 0) {
                                             $('#sct-delmsg-progress-current').text(data.Total);
@@ -592,7 +637,8 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 title: "No messages",
                                                 timer: 5000,
                                                 type: "success",
-                                            });	
+                                            });
+                                            toggleAuto('unpause');
                                         }
                                     }
                                 });
@@ -605,18 +651,12 @@ function Init(friendMessage, checkBlocked, debug) {
                         return;
                     }
                 });
-                
-//OLD STUFF
-                if (!document.getElementById("sct-qckadd")) {
-                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-qckadd">quick-add user</a>').prependTo('#page');
-                } else {
-                    $("#sct-qckadd").remove();
-                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-qckadd">quick-add user</a>').prependTo('#page');
-                    isReloaded = true;
-                    if (debug) console.log("#sct-qckadd was already present.");
-                }
 
-                $("#sct-qckadd").click(function(e) {
+                // - Quick-add user -
+                if (GM_getValue('quickadd')) {
+                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-qckadd">quick-add user</a>').prependTo('#page');
+                }
+                $('#page').on('click', '#sct-qckadd', function(e) {
                     e.preventDefault();
 
                     try {
@@ -627,9 +667,9 @@ function Init(friendMessage, checkBlocked, debug) {
                             inputPlaceholder: "Social Club username",
                             showCancelButton: true,
                             showLoaderOnConfirm: true,
-                            text: 'Please enter the Social Club username you want to add. When you click "Add", the user will automatically be added if it exists.'
-                            +(checkBlocked ? "" : "\n\nNote: You have disabled the blocked users list check. If the user is on your blocked users list, they will be unblocked and sent a friend request.")+
-                            (friendMessage.trim() == "" ? "" : "\n\nNote: You have set a custom friend request message, which will get sent to the user."),
+                            text: 'Please enter the Social Club username you want to add. When you click "Add", the user will automatically be added if it exists.'+
+                            (checkBlocked ? "" : "\n\nNote: You have disabled the blocked users list check. If the user is on your blocked users list, they will be unblocked and sent a friend request.")+
+                            (friendMessage.trim() === '' ? '' : "\n\nNote: You have set a custom friend request message, which will get sent to the user."),
                             title: "Enter username",
                             type: "input",
                         },
@@ -677,7 +717,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(err);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
                                     swal({
                                         allowOutsideClick: true,
@@ -697,9 +737,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(data);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
-                                    if (data.Status == true) {
+                                    if (data.Status === true) {
                                         if (checkBlocked) {
                                             RetrieveBlockedList(data);
                                         } else {
@@ -723,16 +763,11 @@ function Init(friendMessage, checkBlocked, debug) {
                     }
                 });
 
-                if (!document.getElementById("sct-rejreq")) {
+                // - Reject requests -
+                if (GM_getValue('reject')) {
                     $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-rejreq">reject requests</a>').prependTo('#page');
-                } else {
-                    $("#sct-rejreq").remove();
-                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-rejreq">reject requests</a>').prependTo('#page');
-                    isReloaded = true;
-                    if (debug) console.log("#sct-rejreq was already present.");
                 }
-
-                $("#sct-rejreq").click(function(e) {
+                $('#page').on('click', '#sct-rejreq', function(e) {
                     e.preventDefault();
 
                     try {
@@ -752,8 +787,9 @@ function Init(friendMessage, checkBlocked, debug) {
                             title: "Are you sure?",
                             type: "warning",
                         },
-                        function(isConfirm){
+                        function(isConfirm) {
                             if (isConfirm) {
+								toggleAuto('pause');
                                 var children = [];
 
                                 $.ajax({
@@ -772,7 +808,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(err);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
                                         swal({
                                             allowOutsideClick: true,
@@ -781,6 +817,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             timer: 5000,
                                             type: "error",
                                         });
+                                        toggleAuto('unpause');
                                     },
                                     success: function(data){
                                         if (debug) {
@@ -792,9 +829,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(data);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        } 
+                                        }
 
-                                        if (data.Status == true && data.TotalCount > 0) {
+                                        if (data.Status === true && data.TotalCount > 0) {
                                             $('#sct-rejreq-progress-current').text(data.TotalCount);
                                             $('#sct-rejreq-progress-total').text(data.TotalCount);
                                             $('#sct-rejreq-progress').show();
@@ -805,8 +842,8 @@ function Init(friendMessage, checkBlocked, debug) {
 
                                             if (children.length == data.TotalCount) {
                                                 RemoveFriend(children, true);
-                                            };
-                                        } else if (data.Status == true && data.TotalCount == 0) {
+                                            }
+                                        } else if (data.Status === true && data.TotalCount === 0) {
                                             swal({
                                                 allowOutsideClick: true,
                                                 text: "There were no friend requests to reject.",
@@ -814,6 +851,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 timer: 5000,
                                                 type: "success",
                                             });
+                                            toggleAuto('unpause');
                                         } else {
                                             swal({
                                                 allowOutsideClick: true,
@@ -822,6 +860,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 timer: 5000,
                                                 type: "error",
                                             });
+                                            toggleAuto('unpause');
                                         }
                                     }
                                 });
@@ -835,17 +874,11 @@ function Init(friendMessage, checkBlocked, debug) {
                     }
                 });
 
-// NEW STUFF
-                if (!document.getElementById("sct-accfrd")) {
-                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-accfrd">accept requests</a>').prependTo('#page');
-                } else {
-                    $("#sct-accfrd").remove();
-                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-accfrd">accept requests</a>').prependTo('#page');
-                    isReloaded = true;
-                    if (debug) console.log("#sct-accfrd was already present.");
+                // - Accept requests -
+                if (GM_getValue('accept')) {
+                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-accreq">accept requests</a>').prependTo('#page');
                 }
-
-                $("#sct-accfrd").click(function(e) {
+                $('#page').on('click', '#sct-accreq', function(e) {
                     e.preventDefault();
 
                     try {
@@ -860,13 +893,14 @@ function Init(friendMessage, checkBlocked, debug) {
                             showLoaderOnConfirm: true,
                             text: "All friend requests you have received will be accepted.<br /><br />"+
                                   "This process may take up to several minutes. Please be patient for it to be completed before browsing away from this page."+
-                                  "<strong id=\"sct-accfrd-progress\" style=\"font-weight:bold;display:none;\"><br /><br /><span id=\"sct-accfrd-progress-current\">0</span> of "+
-                                  "<span id=\"sct-accfrd-progress-total\">0</span> friend request(s) remaining...</strong>",
+                                  "<strong id=\"sct-accreq-progress\" style=\"font-weight:bold;display:none;\"><br /><br /><span id=\"sct-accreq-progress-current\">0</span> of "+
+                                  "<span id=\"sct-accreq-progress-total\">0</span> friend request(s) remaining...</strong>",
                             title: "Are you sure?",
                             type: "warning",
                         },
-                        function(isConfirm){
+                        function(isConfirm) {
                             if (isConfirm) {
+								toggleAuto('pause');
                                 var children = [];
 
                                 $.ajax({
@@ -885,7 +919,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(err);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
                                         swal({
                                             allowOutsideClick: true,
@@ -894,6 +928,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             timer: 5000,
                                             type: "error",
                                         });
+                                        toggleAuto('unpause');
                                     },
                                     success: function(data){
                                         if (debug) {
@@ -905,12 +940,12 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(data);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        } 
+                                        }
 
-                                        if (data.Status == true && data.TotalCount > 0) {
-                                            $('#sct-accfrd-progress-current').text(data.TotalCount);
-                                            $('#sct-accfrd-progress-total').text(data.TotalCount);
-                                            $('#sct-accfrd-progress').show();
+                                        if (data.Status === true && data.TotalCount > 0) {
+                                            $('#sct-accreq-progress-current').text(data.TotalCount);
+                                            $('#sct-accreq-progress-total').text(data.TotalCount);
+                                            $('#sct-accreq-progress').show();
 
                                             data.RockstarAccounts.forEach(function(e) {
                                                 children.push(e);
@@ -918,8 +953,8 @@ function Init(friendMessage, checkBlocked, debug) {
 
                                             if (children.length == data.TotalCount) {
                                                 AcceptFriend(children, true);
-                                            };
-                                        } else if (data.Status == true && data.TotalCount == 0) {
+                                            }
+                                        } else if (data.Status === true && data.TotalCount === 0) {
                                             swal({
                                                 allowOutsideClick: true,
                                                 text: "There were no friend requests to accept.",
@@ -927,6 +962,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 timer: 5000,
                                                 type: "success",
                                             });
+                                            toggleAuto('unpause');
                                         } else {
                                             swal({
                                                 allowOutsideClick: true,
@@ -935,6 +971,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 timer: 5000,
                                                 type: "error",
                                             });
+                                            toggleAuto('unpause');
                                         }
                                     }
                                 });
@@ -943,21 +980,16 @@ function Init(friendMessage, checkBlocked, debug) {
                             }
                         });
                     } catch (err) {
-                        console.error("Error during #sct-accfrd.click():\n\n"+err.stack);
+                        console.error("Error during #sct-accreq.click():\n\n"+err.stack);
                         return;
                     }
                 });
 
-                if (!document.getElementById("sct-delfrd")) {
+                // - Delete friends -
+                if (GM_getValue('delete')) {
                     $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-delfrd">delete friends</a>').prependTo('#page');
-                } else {
-                    $("#nt-daf").remove();
-                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-delfrd">delete friends</a>').prependTo('#page');
-                    isReloaded = true;
-                    if (debug) console.log("#sct-delfrd was already present.");
                 }
-
-                $("#sct-delfrd").click(function(e) {
+                $('#page').on('click', '#sct-delfrd', function(e) {
                     e.preventDefault();
 
                     try {
@@ -978,8 +1010,9 @@ function Init(friendMessage, checkBlocked, debug) {
                             title: "Are you sure?",
                             type: "warning",
                         },
-                        function(isConfirm){
+                        function(isConfirm) {
                             if (isConfirm) {
+								toggleAuto('pause');
                                 $.ajax({
                                     url: baseURL+"/friends/GetFriendsAndInvitesSentJson?pageNumber=0&onlineService=sc&pendingInvitesOnly=false",
                                     headers: {
@@ -996,7 +1029,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(err);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
                                         swal({
                                             allowOutsideClick: true,
@@ -1005,6 +1038,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             timer: 5000,
                                             type: "error",
                                         });
+                                        toggleAuto('unpause');
                                     },
                                     success: function(data){
                                         if (debug) {
@@ -1016,15 +1050,15 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(data);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        } 
+                                        }
 
-                                        if (data.Status == true && data.TotalCount > 0) {
+                                        if (data.Status === true && data.TotalCount > 0) {
                                             $('#sct-delfrd-progress-current').text(data.TotalCount);
                                             $('#sct-delfrd-progress-total').text(data.TotalCount);
                                             $('#sct-delfrd-retrieving').show();
 
                                             RetrieveAllFriends([]);
-                                        } else if (data.Status == true && data.TotalCount == 0) {
+                                        } else if (data.Status === true && data.TotalCount === 0) {
                                             swal({
                                                 allowOutsideClick: true,
                                                 text: "There were no friends to delete.",
@@ -1032,6 +1066,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 timer: 5000,
                                                 type: "success",
                                             });
+                                            toggleAuto('unpause');
                                         } else {
                                             swal({
                                                 allowOutsideClick: true,
@@ -1040,6 +1075,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 timer: 5000,
                                                 type: "error",
                                             });
+                                            toggleAuto('unpause');
                                         }
                                     }
                                 });
@@ -1052,7 +1088,179 @@ function Init(friendMessage, checkBlocked, debug) {
                         return;
                     }
                 });
+                
+                // - Delete dropees -
+                if (isDL() && GM_getValue('delete2')) {
+                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-deldrp">delete dropees</a>').prependTo('#page');
+                }
+                $('#page').on('click', '#sct-deldrp', function(e) {
+                    e.preventDefault();
 
+                    try {
+                        swal({
+                            allowEscapeKey: false,
+                            cancelButtonText: "No",
+                            closeOnConfirm: false,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "Yes",
+                            html: true,
+                            showCancelButton: true,
+                            showLoaderOnConfirm: true,
+                            text: "All dropees will be removed from your friend list.<br /><br />"+
+                                  "This process may take up to several minutes. Please be patient for it to be completed."+
+                                  "<strong id=\"sct-delfrd-retrieving\" style=\"font-weight:bold;display:none;\"><br /><br />Retrieving friends..."+
+                                  "</strong><strong id=\"sct-delfrd-progress\" style=\"font-weight:bold;display:none;\"><br /><br /><span id=\"sct-delfrd-progress-current\">0</span> of "+
+                                  "<span id=\"sct-delfrd-progress-total\">0</span> friend(s) remaining...</strong>",
+                            title: "Are you sure?",
+                            type: "warning",
+                        },
+                        function(isConfirm) {
+                            if (isConfirm) {
+								toggleAuto('pause');
+                                $.ajax({
+                                    url: baseURL+"/friends/GetFriendsAndInvitesSentJson?pageNumber=0&onlineService=sc&pendingInvitesOnly=false",
+                                    headers: {
+                                        "Accept": "application/json",
+                                        "RequestVerificationToken": verificationToken
+                                    },
+                                    error: function(err){
+                                        if (debug) {
+                                            console.groupCollapsed("GetFriendsAndInvitesSentJson AJAX FAIL");
+                                            console.group("Request");
+                                            console.log(this);
+                                            console.groupEnd();
+                                            console.group("Response");
+                                            console.log(err);
+                                            console.groupEnd();
+                                            console.groupEnd();
+                                        }
+
+                                        swal({
+                                            allowOutsideClick: true,
+                                            text: "Something went wrong while trying to fetch the total amount of friends.",
+                                            title: err.status+" - "+err.statusText,
+                                            timer: 5000,
+                                            type: "error",
+                                        });
+                                        toggleAuto('unpause');
+                                    },
+                                    success: function(data){
+                                        if (debug) {
+                                            console.groupCollapsed("GetFriendsAndInvitesSentJson AJAX OK");
+                                            console.group("Request");
+                                            console.log(this);
+                                            console.groupEnd();
+                                            console.group("Response");
+                                            console.log(data);
+                                            console.groupEnd();
+                                            console.groupEnd();
+                                        }
+
+                                        if (data.Status === true && data.TotalCount > 0) {
+                                            $('#sct-delfrd-progress-current').text(data.TotalCount);
+                                            $('#sct-delfrd-progress-total').text(data.TotalCount);
+                                            $('#sct-delfrd-retrieving').show();
+
+                                            RetrieveAllFriends([], undefined, true);
+                                        } else if (data.Status === true && data.TotalCount === 0) {
+                                            swal({
+                                                allowOutsideClick: true,
+                                                text: "There were no friends to delete.",
+                                                title: "No friends",
+                                                timer: 5000,
+                                                type: "success",
+                                            });
+                                            toggleAuto('unpause');
+                                        } else {
+                                            swal({
+                                                allowOutsideClick: true,
+                                                text: "Something went wrong while trying to fetch friend data.",
+                                                title: "Something went wrong",
+                                                timer: 5000,
+                                                type: "error",
+                                            });
+                                            toggleAuto('unpause');
+                                        }
+                                    }
+                                });
+                            } else {
+                                return;
+                            }
+                        });
+                    } catch (err) {
+                        console.error("Error during #sct-delfrd.click():\n\n"+err.stack);
+                        return;
+                    }
+                });
+                
+                // - Auto-accept -
+                if (GM_getValue('auto')) {
+                    $('<a class="btn btnGold btnRounded sctb" href="#" id="sct-auto">auto-accept <span class="off">[off]</span></a>').prependTo('#page');
+                }
+                $('#page').on('click', '#sct-auto', function(e) {
+                    e.preventDefault();
+
+                    try {
+                        if (auto) return toggleAuto();
+                        var t = setInterval( function() {
+							if (!autoPaused) {
+                                var children = [];
+
+                                $.ajax({
+                                    url: baseURL+"/friends/GetReceivedInvitesJson",
+                                    headers: {
+                                        "Accept": "application/json",
+                                        "RequestVerificationToken": verificationToken
+                                    },
+                                    error: function(err){
+                                        if (debug) {
+                                            console.groupCollapsed("GetReceivedInvitesJson AJAX FAIL");
+                                            console.group("Request");
+                                            console.log(this);
+                                            console.groupEnd();
+                                            console.group("Response");
+                                            console.log(err);
+                                            console.groupEnd();
+                                            console.groupEnd();
+                                        }
+                                        console.error("[Auto-accept] Error fetching the total amount of friend requests.\n"+err.status+" - "+err.statusText);
+                                    },
+                                    success: function(data){
+                                        if (debug) {
+                                            console.groupCollapsed("GetReceivedInvitesJson AJAX OK");
+                                            console.group("Request");
+                                            console.log(this);
+                                            console.groupEnd();
+                                            console.group("Response");
+                                            console.log(data);
+                                            console.groupEnd();
+                                            console.groupEnd();
+                                        }
+
+                                        if (data.Status === true && data.TotalCount > 0) {
+                                            data.RockstarAccounts.forEach(function(e) {
+                                                children.push(e);
+                                            });
+                                            if (children.length == data.TotalCount) {
+                                                AcceptFriend(children, true);
+                                            }
+                                        } else if (data.Status === true && data.TotalCount === 0) {
+                                            console.log("[Auto-accept] There were no friend requests to accept.");
+                                        } else {
+                                            console.error("[Auto-accept] Error fetching friend request data.");
+                                        }
+                                    }
+                                });
+							} else if (debug) console.log('Auto-accept called, but paused.');
+                        }, 15000);
+                        toggleAuto(t);
+                    } catch (err) {
+                        console.error("Error during #sct-auto.click():\n\n"+err.stack);
+                        return;
+                    }
+                });
+
+                // -- Helper functions for main functions above --
                 function RetrieveAllMessageUsers(source, pageIndex) {
                     try {
                         if (pageIndex === undefined) pageIndex = 0;
@@ -1074,7 +1282,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(err);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
                                     swal({
                                         allowOutsideClick: true,
@@ -1083,6 +1291,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         timer: 5000,
                                         type: "error",
                                     });
+                                    toggleAuto('unpause');
                                 },
                                 success: function(data){
                                     if (debug) {
@@ -1094,7 +1303,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(data);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
                                     data.Users.forEach(function(e){
                                         source.push(e);
@@ -1136,7 +1345,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                 console.log(item);
                                 console.groupEnd();
                                 console.groupEnd();
-                            };
+                            }
 
                             $.ajax({
                                 url: baseURL+"/Message/GetMessages?rockstarId="+item.RockstarId,
@@ -1154,7 +1363,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(err);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
                                     if (source.length > 0) {
                                         RetrieveAllMessages(source, target);
@@ -1177,7 +1386,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(data);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
                                     target = target.concat(data.Messages);
 
@@ -1216,7 +1425,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                 console.log(item);
                                 console.groupEnd();
                                 console.groupEnd();
-                            };
+                            }
 
                             $.ajax({
                                 url: baseURL+"/Message/DeleteMessage",
@@ -1236,7 +1445,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(err);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
                                     if (item.ScNickname.toLowerCase() === userNickname.toLowerCase()) {
                                         console.error("A message you sent to someone could not be removed. ("+err.status+" - "+err.statusText+")");
@@ -1256,6 +1465,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             timer: 5000,
                                             type: "success",
                                         });
+                                        toggleAuto('unpause');
                                     }
                                 },
                                 success: function(data){
@@ -1268,9 +1478,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(data);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
-                                    if (data.Status == true) {
+                                    if (data.Status === true) {
                                         if (item.ScNickname != undefined) {
                                             if (item.ScNickname.toLowerCase() === userNickname.toLowerCase()) {
                                                 console.info("A message you sent to someone has been removed.");
@@ -1281,7 +1491,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.info("A message someone sent to you has been removed.");
                                         }
                                     } else {
-                                        if (item.ScNickname != undefined) {
+                                        if (item.ScNickname !== undefined) {
                                             if (item.ScNickname.toLowerCase() === userNickname.toLowerCase()) {
                                                 console.info("A message you sent to someone could not be removed.");
                                             } else {
@@ -1306,6 +1516,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             timer: 5000,
                                             type: "success",
                                         });
+                                        toggleAuto('unpause');
                                     }
                                 },
                                 xhr: function() {
@@ -1326,9 +1537,10 @@ function Init(friendMessage, checkBlocked, debug) {
                     }
                 }
 
-                function RetrieveAllFriends(source, pageIndex) {
+                function RetrieveAllFriends(source, pageIndex, reverseFilter) {
                     try {
                         if (pageIndex === undefined) pageIndex = 0;
+                        if (reverseFilter === undefined) reverseFilter = 0;
 
                         setTimeout(function() {
                             $.ajax({
@@ -1347,7 +1559,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(err);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
                                     swal({
                                         allowOutsideClick: true,
@@ -1367,9 +1579,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(data);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
-                                    if (data.Status == true) {
+                                    if (data.Status === true) {
                                         data.RockstarAccounts.forEach(function(e){
                                             if (e !== undefined) source.push(e);
                                         });
@@ -1381,17 +1593,18 @@ function Init(friendMessage, checkBlocked, debug) {
                                             timer: 5000,
                                             type: "error",
                                         });
+                                        toggleAuto('unpause');
                                     }
 
                                     if (source.length < data.TotalCount) {
-                                        RetrieveAllFriends(source, (pageIndex + 1));
+                                        RetrieveAllFriends(source, (pageIndex + 1), reverseFilter);
                                     } else {
                                         if (debug) console.log("RetrieveAllFriends() complete.");
 
                                         $('#sct-delfrd-retrieving').hide();
                                         $('#sct-delfrd-progress').show();
 
-                                        RemoveFriend(source);
+                                        RemoveFriend(source, false, reverseFilter);
                                     }
                                 }
                             });
@@ -1402,40 +1615,48 @@ function Init(friendMessage, checkBlocked, debug) {
                     }
                 }
 
-                function RemoveFriend(source, isFriendRequestLoop) {
+                function RemoveFriend(source, isFriendRequestLoop, reverseFilter) {
+                    if (debug) console.log('Calling RemoveFriend(): '+(isFriendRequestLoop ? 'Rejecting requests from ' : 'Removing ')+(reverseFilter ? 'dropees' : 'non-dropees OR all players')+'.');
                     try {
                         if (isFriendRequestLoop === undefined) isFriendRequestLoop = false;
+                        if (reverseFilter === undefined) reverseFilter = false;
 
                         setTimeout(function() {
                             var item = source.pop();
                             if (item === undefined) {
                                 if (debug) console.log("RemoveFriend() SKIP undefined");
-                                RemoveFriend(source, isFriendRequestLoop);
+                                RemoveFriend(source, isFriendRequestLoop, reverseFilter);
                                 return;
                             }
-/*NEW STUFF: droplist filter*/  if (isDL() && isOnDroplist(item.Name)) {
-                                    console.log('Skipped removing '+item.Name+' - There is a droplist and they are on it.');
-                                    if (source.length > 0)
-                                        RemoveFriend(source, isFriendRequestLoop);
-                                    else if (isFriendRequestLoop)
-                                        swal({
-                                            allowOutsideClick: true,
-                                            text: "All friend requests you received from non-dropees should have been rejected.\n\n"+
-                                                  "You can see exactly which friends have been removed and which ones haven't by opening the console (F12).",
-                                            title: "Friend requests rejected",
-                                            timer: 5000,
-                                            type: "success",
-                                        });
-                                    else swal({
-                                            allowOutsideClick: true,
-                                            text: "All non-dropee friends should have been removed.\n\n"+
-                                                  "You can see exactly which friends have been removed and which ones haven't by opening the console (F12).",
-                                            title: "Friends removed",
-                                            timer: 5000,
-                                            type: "success",
-                                        });
-                                    return;
+                            // Droplist filter
+                            if (isDL() && ( (isOnDroplist(item.Name) && !reverseFilter) || (!isOnDroplist(item.Name) && reverseFilter) )) {
+                                console.log('Skipped removing '+item.Name+' - There is a droplist and they are '+(reverseFilter ? 'not ' : '')+'on it.');
+                                if (source.length > 0)
+                                    RemoveFriend(source, isFriendRequestLoop, reverseFilter);
+                                else if (isFriendRequestLoop) {
+                                    swal({
+                                        allowOutsideClick: true,
+                                        text: "All friend requests you received from non-dropees should have been rejected.\n\n"+
+                                              "You can see exactly which friends have been removed and which ones haven't by opening the console (F12).",
+                                        title: "Friend requests rejected",
+                                        timer: 5000,
+                                        type: "success",
+                                    });
+                                    toggleAuto('unpause');
                                 }
+                                else {
+                                    swal({
+                                        allowOutsideClick: true,
+                                        text: "All non-dropee friends should have been removed.\n\n"+
+                                              "You can see exactly which friends have been removed and which ones haven't by opening the console (F12).",
+                                        title: "Friends removed",
+                                        timer: 5000,
+                                        type: "success",
+                                    });
+                                    toggleAuto('unpause');
+                                }
+                                return;
+                            }
 
                             if (debug) {
                                 console.groupCollapsed("RemoveFriend() POP");
@@ -1464,7 +1685,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(err);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
                                         console.error("Your friend " + item.Name + " could not be removed. ("+err.status+" - "+err.statusText+")");
 
@@ -1475,28 +1696,30 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 $('#sct-delfrd-progress-current').text(source.length);
                                             }
 
-                                            RemoveFriend(source);
+                                            RemoveFriend(source, false, reverseFilter);
                                         } else {
                                             if (isFriendRequestLoop) {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All friend requests you received should have been rejected.\n\n"+
+                                                    text: "All friend requests you received"+(isDL() ? ' from non-dropees' : '')+" should have been rejected.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friend requests rejected",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             } else {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All your friends should have been removed.\n\n"+
+                                                    text: "All your"+(isDL() ? ' non-dropee' : '')+" friends should have been removed.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friends removed",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             }
                                         }
                                     },
@@ -1510,9 +1733,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(data);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
-                                        if (data.Status == true) {
+                                        if (data.Status === true) {
                                             console.info("Your friend " + item.Name + " has been removed.");
                                         } else {
                                             console.error("Your friend " + item.Name + " could not be removed.");
@@ -1525,28 +1748,30 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 $('#sct-delfrd-progress-current').text(source.length);
                                             }
 
-                                            RemoveFriend(source);
+                                            RemoveFriend(source, false, reverseFilter);
                                         } else {
                                             if (isFriendRequestLoop) {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All friend requests you received should have been rejected.\n\n"+
+                                                    text: "All friend requests you received"+(isDL() ? ' from non-dropees' : '')+" should have been rejected.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friend requests rejected",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             } else {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All your friends should have been removed.\n\n"+
+                                                    text: "All your"+(isDL() ? ' non-dropee' : '')+" friends should have been removed.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friends removed",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             }
                                         }
                                     },
@@ -1580,7 +1805,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(err);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
                                         console.error("The friend request you sent to " + item.Name + " could not be cancelled. ("+err.status+" - "+err.statusText+")");
 
@@ -1591,28 +1816,30 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 $('#sct-delfrd-progress-current').text(source.length);
                                             }
 
-                                            RemoveFriend(source);
+                                            RemoveFriend(source, false, reverseFilter);
                                         } else {
                                             if (isFriendRequestLoop) {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All friend requests you received should have been rejected.\n\n"+
+                                                    text: "All friend requests you received"+(isDL() ? ' from non-dropees' : '')+" should have been rejected.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friend requests rejected",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             } else {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All your friends should have been removed.\n\n"+
+                                                    text: "All your"+(isDL() ? ' non-dropee' : '')+" friends should have been removed.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friends removed",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             }
                                         }
                                     },
@@ -1626,9 +1853,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(data);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
-                                        if (data.Status == true) {
+                                        if (data.Status === true) {
                                             console.info("The friend request you sent to " + item.Name + " has been cancelled.");
                                         } else {
                                             console.error("The friend request you sent to " + item.Name + " could not be cancelled.");
@@ -1641,28 +1868,30 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 $('#sct-delfrd-progress-current').text(source.length);
                                             }
 
-                                            RemoveFriend(source);
+                                            RemoveFriend(source, false, reverseFilter);
                                         } else {
                                             if (isFriendRequestLoop) {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All friend requests you received should have been rejected.\n\n"+
+                                                    text: "All friend requests you received"+(isDL() ? ' from non-dropees' : '')+" should have been rejected.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friend requests rejected",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             } else {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All your friends should have been removed.\n\n"+
+                                                    text: "All your"+(isDL() ? ' non-dropee' : '')+" friends should have been removed.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friends removed",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             }
                                         }
                                     },
@@ -1696,7 +1925,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(err);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
                                         console.error("The friend request you received from " + item.Name + " could not be rejected. ("+err.status+" - "+err.statusText+")");
 
@@ -1707,28 +1936,30 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 $('#sct-delfrd-progress-current').text(source.length);
                                             }
 
-                                            RemoveFriend(source);
+                                            RemoveFriend(source, false, reverseFilter);
                                         } else {
                                             if (isFriendRequestLoop) {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All friend requests you received should have been rejected.\n\n"+
+                                                    text: "All friend requests you received"+(isDL() ? ' from non-dropees' : '')+" should have been rejected.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friend requests rejected",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             } else {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All your friends should have been removed.\n\n"+
+                                                    text: "All your"+(isDL() ? ' non-dropee' : '')+" friends should have been removed.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friends removed",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             }
                                         }
                                     },
@@ -1742,9 +1973,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(data);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
-                                        if (data.Status == true) {
+                                        if (data.Status === true) {
                                             console.info("The friend request you received from " + item.Name + " has been rejected.");
                                         } else {
                                             console.error("The friend request you received from " + item.Name + " could not be rejected.");
@@ -1757,28 +1988,30 @@ function Init(friendMessage, checkBlocked, debug) {
                                                 $('#sct-delfrd-progress-current').text(source.length);
                                             }
 
-                                            RemoveFriend(source);
+                                            RemoveFriend(source, false, reverseFilter);
                                         } else {
                                             if (isFriendRequestLoop) {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All friend requests you received should have been rejected.\n\n"+
+                                                    text: "All friend requests you received"+(isDL() ? ' from non-dropees' : '')+" should have been rejected.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friend requests rejected",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             } else {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All your friends should have been removed.\n\n"+
+                                                    text: "All your"+(isDL() ? ' non-dropee' : '')+" friends should have been removed.\n\n"+
                                                           "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friends removed",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             }
                                         }
                                     },
@@ -1803,28 +2036,30 @@ function Init(friendMessage, checkBlocked, debug) {
                                         $('#sct-delfrd-progress-current').text(source.length);
                                     }
 
-                                    RemoveFriend(source);
+                                    RemoveFriend(source, false, reverseFilter);
                                 } else {
                                     if (isFriendRequestLoop) {
                                         swal({
                                             allowOutsideClick: true,
-                                            text: "All friend requests you received should have been rejected.\n\n"+
+                                            text: "All friend requests you received"+(isDL() ? ' from non-dropees' : '')+" should have been rejected.\n\n"+
                                                   "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                   " To view the changes to your friends list, please refresh the page.",
                                             title: "Friend requests rejected",
                                             timer: 5000,
                                             type: "success",
                                         });
+										toggleAuto('unpause');
                                     } else {
                                         swal({
                                             allowOutsideClick: true,
-                                            text: "All your friends should have been removed.\n\n"+
+                                            text: "All your"+(isDL() ? ' non-dropee' : '')+" friends should have been removed.\n\n"+
                                                   "You can see exactly which friends have been removed and which ones haven't by opening the console (F12)."+
                                                   " To view the changes to your friends list, please refresh the page.",
                                             title: "Friends removed",
                                             timer: 5000,
                                             type: "success",
                                         });
+                                        toggleAuto('unpause');
                                     }
                                 }
                             }
@@ -1856,7 +2091,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(err);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
                                     swal({
                                         allowOutsideClick: true,
@@ -1876,9 +2111,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.log(data);
                                         console.groupEnd();
                                         console.groupEnd();
-                                    };
+                                    }
 
-                                    if (data.Status == true) {
+                                    if (data.Status === true) {
                                         data.RockstarAccounts.forEach(function(e){
                                             if (e !== undefined) target.push(e);
                                         });
@@ -1887,7 +2122,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             return obj.Name.trim().toLowerCase() === source.Nickname.trim().toLowerCase();
                                         })[0];
 
-                                        if (obj == undefined) {
+                                        if (obj === undefined) {
                                             AddFriend(source);
                                         } else {
                                             swal({
@@ -1936,7 +2171,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                     console.log(err);
                                     console.groupEnd();
                                     console.groupEnd();
-                                };
+                                }
 
                                 swal({
                                     allowOutsideClick: true,
@@ -1956,9 +2191,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                     console.log(data);
                                     console.groupEnd();
                                     console.groupEnd();
-                                };
+                                }
 
-                                if (data.Status == true) {
+                                if (data.Status === true) {
                                     swal({
                                         allowOutsideClick: true,
                                         text: 'A friend request has been sent to "' + source.Nickname + '".\n\nTo view the changes to your friends list, please refresh the page.',
@@ -1993,7 +2228,6 @@ function Init(friendMessage, checkBlocked, debug) {
                     }
                 }
 
-//NEW STUFF
                 function AcceptFriend(source, isFriendRequestLoop) {
                     try {
                         if (isFriendRequestLoop === undefined) isFriendRequestLoop = false;
@@ -2012,25 +2246,29 @@ function Init(friendMessage, checkBlocked, debug) {
                                 console.log(item);
                                 console.groupEnd();
                                 console.groupEnd();
-                            };
-                            
-/*NEW STUFF: droplist filter*/  if (isDL() && !isOnDroplist(item.Name)) {
-                                    console.log('Skipped accepting '+item.Name+' - There is a droplist and they are not on it.');
-                                    if (source.length > 0)
-                                        AcceptFriend(source, isFriendRequestLoop);
-                                    else swal({
-                                            allowOutsideClick: true,
-                                            text: "All friend requests you received from dropees should have been accepted.\n\n"+
-                                                  "You can see exactly which friends have been added and which ones haven't by opening the console (F12)."+
-                                                  " To view the changes to your friends list, please refresh the page.",
-                                            title: "Friend requests accepted",
-                                            timer: 2000,
-                                            type: "success",
-                                        });
-                                    return;
-                                }
+                            }
 
-                                if (debug) console.log('Making request: {"id":'+item.RockstarId+',"op":"confirm","custommessage":"","accept":"true"}');//  }');//
+                            // Droplist filter
+                            if (isDL() && !isOnDroplist(item.Name)) {
+                                console.log('Skipped accepting '+item.Name+' - There is a droplist and they are not on it.');
+                                if (source.length > 0)
+                                    AcceptFriend(source, isFriendRequestLoop);
+                                else {
+                                    swal({
+                                        allowOutsideClick: true,
+                                        text: "All friend requests you received from dropees should have been accepted.\n\n"+
+                                              "You can see exactly which friends have been added and which ones haven't by opening the console (F12)."+
+                                              " To view the changes to your friends list, please refresh the page.",
+                                        title: "Friend requests accepted",
+                                        timer: 2000,
+                                        type: "success",
+                                    });
+                                    toggleAuto('unpause');
+                                }
+                                return;
+                            }
+
+                                if (debug) console.log('Making request: {"id":'+item.RockstarId+',"op":"confirm","custommessage":"","accept":"true"}');
                                 $.ajax({
                                     url: baseURL+"/friends/UpdateFriend",
                                     type: "PUT",
@@ -2049,13 +2287,13 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(err);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
                                         console.error("The friend request you received from " + item.Name + " could not be accepted. ("+err.status+" - "+err.statusText+")");
 
                                         if (source.length > 0) {
                                             if (isFriendRequestLoop) {
-                                                $('#sct-accfrd-progress-current').text(source.length);
+                                                $('#sct-accreq-progress-current').text(source.length);
                                             }
 
                                             AcceptFriend(source);
@@ -2063,23 +2301,25 @@ function Init(friendMessage, checkBlocked, debug) {
                                             if (isFriendRequestLoop) {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All friend requests you received should have been accepted.\n\n"+
+                                                    text: "All friend requests you received"+(isDL() ? ' from dropees' : '')+" should have been accepted.\n\n"+
                                                           "You can see exactly which friends have been added and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friend requests accepted",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             } else {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All your friends should have been added.\n\n"+
+                                                    text: "All your friends"+(isDL() ? ' on the droplist' : '')+" should have been added.\n\n"+
                                                           "You can see exactly which friends have been added and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friends added",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             }
                                         }
                                     },
@@ -2093,9 +2333,9 @@ function Init(friendMessage, checkBlocked, debug) {
                                             console.log(data);
                                             console.groupEnd();
                                             console.groupEnd();
-                                        };
+                                        }
 
-                                        if (data.Status == true) {
+                                        if (data.Status === true) {
                                             console.info("The friend request you received from " + item.Name + " has been accepted.");
                                         } else {
                                             console.error("The friend request you received from " + item.Name + " could not be accepted.");
@@ -2103,7 +2343,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                                         if (source.length > 0) {
                                             if (isFriendRequestLoop) {
-                                                $('#sct-accfrd-progress-current').text(source.length);
+                                                $('#sct-accreq-progress-current').text(source.length);
                                             }
 
                                             AcceptFriend(source);
@@ -2111,7 +2351,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                             if (isFriendRequestLoop) {
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All friend requests you received should have been accepted.\n\n"+
+                                                    text: "All friend requests you received"+(isDL() ? ' from dropees' : '')+" should have been accepted.\n\n"+
                                                           "You can see exactly which friends have been added and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friend requests accepted",
@@ -2119,15 +2359,17 @@ function Init(friendMessage, checkBlocked, debug) {
                                                     type: "success",
                                                 });
                                             } else {
+                                                toggleAuto('unpause');
                                                 swal({
                                                     allowOutsideClick: true,
-                                                    text: "All your friends should have been added.\n\n"+
+                                                    text: "All your friends"+(isDL() ? ' on the droplist' : '')+" should have been added.\n\n"+
                                                           "You can see exactly which friends have been added and which ones haven't by opening the console (F12)."+
                                                           " To view the changes to your friends list, please refresh the page.",
                                                     title: "Friends added",
                                                     timer: 5000,
                                                     type: "success",
                                                 });
+                                                toggleAuto('unpause');
                                             }
                                         }
                                     },
@@ -2238,7 +2480,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                                     if (source.length > 0) {
                                         if (isFriendRequestLoop) {
-                                            $('#nt-accfrd-progress-current').text(source.length);
+                                            $('#nt-accreq-progress-current').text(source.length);
                                         }
 
                                         DeletePost(source);
@@ -2279,18 +2521,8 @@ function Init(friendMessage, checkBlocked, debug) {
                         return;
                     }
                 }*/
-
-
-
-                console.info("The Social Club tool was "+(isReloaded ? "re" : "")+"loaded successfully.");
-            } /*else {
-                swal({
-                    allowOutsideClick: true,
-                    text: "The Social Club tool requires you to log in to be able to apply changes to your account. Please log into the account you want to use with the Social Club tool, then click the bookmark again.",
-                    title: "Log in required",
-                    type: "warning"
-                });
-            }*/
+                console.info("The Social Club tool was loaded successfully.");
+            }
         } catch (err) {
             console.error("Uncaught exception:\n\n"+err.stack);
             return;
