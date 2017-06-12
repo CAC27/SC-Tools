@@ -27,6 +27,8 @@ If you can manage to use Tampermonkey and install this on another browser, good 
 * The blue refresh buttons will refresh stats for a whole group of dropees. The "group" will be the next 12 dropees (before the next blue refresh button.)
 
 ### More info
+* Orange name on droplist = the name is fake because it does not match Rockstar's naming rules.
+* Yellow name on droplist = the account does not exist OR you've added yourself to your droplist.
 * `Auto-accept` works the same way as the normal accept button: accepts dropees if you have a droplist or all requests if you don't.
 * Looped requests (accept *all*, delete *all*, etc.) are done once per second because rate limits.
 * After accepting friends from the droplist, it's advisable to reload stats as many players set their privacy settings to only share stats with friends.
