@@ -17,23 +17,7 @@ Then click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js)
 ##### *Other browsers*
 If you can manage to use Tampermonkey and install this on another browser, good for you ¯\\_(ツ)_/¯
 
-### About stats
-* Yellow question marks mean stats are hidden by the player.
-* Orange question marks mean that: Either
-  * A. The request failed due to rate limits.
-  * B. That user was banned/reset to rank 0.
-* Money amount *(which includes bank + wallet)* will automatically turn red if it's >500m.
-* If you've defined a personal limit, money amount will turn orange if said amount exceeds said limit.
-* The blue refresh buttons will refresh stats for a whole group of dropees. The "group" will be the next 12 dropees (before the next blue refresh button.)
-
-### More info
-* Orange name on droplist = the name is fake because it does not match Rockstar's naming rules.
-* Yellow name on droplist = the account does not exist OR you've added yourself to your droplist.
-* `Auto-accept` works the same way as the normal accept button: accepts dropees if you have a droplist or all requests if you don't.
-* Looped requests (accept *all*, delete *all*, etc.) are done once per second because rate limits.
-* After accepting friends from the droplist, it's advisable to reload stats as many players set their privacy settings to only share stats with friends.
-
-### Features
+### What does this button do?
 ##### When no droplist is active:
 Button | Function
 -------|---------
@@ -42,7 +26,6 @@ Accept requests | Accepts all friend requests you have received.
 Reject requests | Rejects all friend requests you have received.
 Quick-add user | Searches for a username, sends them a friend request, and accepts the confirmation all with one click.
 Delete messages | Deletes all messages, sent and received, from your inbox.
-
 ##### When a droplist is active:
 Button | Function
 -------|---------
@@ -51,10 +34,40 @@ Accept dropees | Accepts all friend requests you have received from people that 
 Reject non-dropees | Rejects all friend requests you have received from people that are __not__ on your droplist.
 Delete dropees | Remove all friends / reject all requests from dropees. Useful if you only have one account.
 
+##### General info
+* `Auto-accept` works the same way as the normal accept button: accepts dropees if you have a droplist or all requests if you don't.
+* Looped requests (accept *all*, delete *all*, etc.) are done once per second because rate limits.
+* After accepting friends from the droplist, it's advisable to reload stats as many players set their privacy settings to only share stats with friends.
+* All buttons can be enabled or disabled from the settings menu (see below.)
+
+### Droplist info
+* Names: 
+  * Orange name = the name is fake because it does not match Rockstar's naming rules.
+  * Yellow name = the account does not exist OR you've added yourself to your droplist.
+  * Blue name = this person is your friend OR you've sent them a request. 
+* Icons:
+  * Trashcan = delete from droplist
+  * Reload = refresh stats
+  * Blue reload = refresh stats for the next 12 dropees
+  * Green person `+` = send a friend request
+  * Red person `-` = remove friend
+  * Yellow person `-` (by a blue name) = cancel friend request
+  * Yellow person `+`/`-` (by white name) = accept/reject friend request, respectively
+* Stats:
+  * Yellow question marks mean stats are hidden by the player.
+  * Orange question marks mean that: Either
+    * A. The request failed due to rate limits.
+    * B. That user was banned/reset to rank 0.
+  * Money amount *(which includes bank + wallet)* will automatically turn red if it's >500m.
+  * If you've defined a personal limit, money amount will turn orange if said amount exceeds said limit.
+
 ### Settings
 There is now a full-featured settings menu! This allows you to toggle a few options as well as fully customize which buttons appear on the top of the page. Just head over to the account settings menu and you'll see a brand-new option. ![Image of account settings](https://i.imgur.com/mF6yL5S.png)
 
 ### Troubleshooting
+* Friend requests may not display properly on the droplist 100% of the time. Two things to do to fix it:
+  * Wait at least 10 seconds *(R\* servers can be delayed sometimes)*
+  * Try using Ctrl+F5 or Shift+F5 to clear the cache.
 * To set a personal limit, you must uncheck the box, change the number, then check it again.
 * If you're having trouble with `Delete all messages`, just run it a couple times and it'll delete all of them eventually.
 
