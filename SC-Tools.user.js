@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         SC Tools
-// @version      1.4
+// @version      1.4.1
 // @description  Useful tools for dropping.
 // @author       CAC
 // @downloadURL  https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js
@@ -105,7 +105,7 @@ function Init(friendMessage, checkBlocked, debug) {
                 // -- Droplist page --
                 if (window.location.href.match(/https:\/\/(\w\w\.|es-mx\.)?socialclub\.rockstargames\.com\/tools.*/)) {
                     $('.alertBox.notFound').replaceWith('<div id="sctools"><div id="droplist" class="activePanel"> <div class="gridPanel sct" id="droplist_info"> <h3 class="sct">Edit Droplist</h3> <p class="sct">This is designed to accept dropBot messages:<br><br> <b>Discord Name:</b> someName <b>ID:</b> 1234567890 - <b>SC:</b> socialClubName - <b>Drops Attended:</b> x<br><i>(one dropee per line)</i> <br><br>So just directly copy and paste them. <br><br>Note that the button functions change if you have a droplist. </p> <div id="droplist_input_wrapper"> <textarea id="droplist_input" placeholder="Discord: CAC - SC: ¯\\_(ツ)_/¯ - Drops attended: 19\nDiscord: YellowHeart - SC: 🤔 - Drops Attended: 70"></textarea> <a class="btn btnGold btnrounded sctb2" href="#" id="sct-add">add</a> <a class="btn btnGold btnRounded sctb2" href="#" id="sct-remove">remove</a> </div></div><div class="gridPanel sct" id="current_droplist"> <h3 class="sct">Current Droplist</h3> <p class="sct">This is a list of your dropees, including some info about them.<br><br>It will be in the format:<br>SC name | Discord name | Total money | Rank | Drops attended.<br><br><i>Note: Stats (rank/cash) will be unavailable for some players, due to privacy settings.</i> </p> <div id="droplist_wrapper"> <ul id="current_list">   <li class="empty">Tumbleweeds...</li> </ul> <a class="btn btnGold btnrounded sctb2" href="#" id="sct-clear">clear</a></div></div></div></div>');
-                    $('head').append('<style id="sctools_style">h3.sct { color: white; padding: 5px; } p.sct { color: #bbb; padding: 10px; } textarea#droplist_input { color: #fff; width: 99%; min-height: 300px; margin: 5px; background: #222; padding:  5px; border: 2px solid #444; border-radius: 10px; } a.btn.btngold.btnrounded.sctb2 { margin: 5px; } .gridPanel.sct { padding: 10px !important; } div#current_droplist { float: right; width: 59%; } div#droplist_info { float: left; width: 39%; } .empty, .gray { color: #666; } ul#current_list { color: #fff; background: #222; padding: 10px; margin: 5px; } #current_list li { padding:  5px; border-bottom: 2px solid #666; } .unknown { color: #FB0; } .bl { color: #F00; } .fail { color: #F70 } /*.rank { background: url(/images/games/GTAV/player-rank.png) no-repeat; background-size: 30px; padding: 4px 3px; }*/ .sctb-16 { float: right; height: 16px; width: 16px; background-size: 16px; display: inline-block; transition: 150ms; } .sctb-16:hover { filter: brightness(1.5); cursor: pointer; }'+
+                    $('head').append('<style id="sctools_style">h3.sct { color: white; padding: 5px; } p.sct { color: #bbb; padding: 10px; } textarea#droplist_input { color: #fff; width: 99%; min-height: 300px; margin: 5px; background: #222; padding:  5px; border: 2px solid #444; border-radius: 10px; } a.btn.btngold.btnrounded.sctb2 { margin: 5px; } .gridPanel.sct { padding: 10px !important; } div#current_droplist { float: right; width: 59%; } div#droplist_info { float: left; width: 39%; } .empty, .gray { color: #666; } .total { text-align: right; } ul#current_list { color: #fff; background: #222; padding: 10px; margin: 5px; } #current_list li { padding:  5px; border-bottom: 2px solid #666; } .unknown { color: #FB0; } .bl { color: #F00; } .fail { color: #F70 } /*.rank { background: url(/images/games/GTAV/player-rank.png) no-repeat; background-size: 30px; padding: 4px 3px; }*/ .sctb-16 { float: right; height: 16px; width: 16px; background-size: 16px; display: inline-block; transition: 150ms; } .sctb-16:hover { filter: brightness(1.5); cursor: pointer; }'+
                         '.sct-del { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAIhIAACISAFlEbUFAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAHNSURBVHja7Ne9axRBGMfxz94diQlnSGN8AQXFQlCxsBUrFQVFUUvFzj9Bi2ssPBDs/BPyBwgBXyE2VloElKigIgFf0EIUVBSJcW2eg2VZs+txG0XuB8sMv5md/c7sM7vzJGmagk6no0QTuIhjWI2fufYGvuEOzuHtcoN1u13QUl1XcKakzyROYS0OVBm0KsAaHI36PKajnkSZYgnHsQf7sB2P+wHYha0xICxiS8wOHuAuxnP3fcX6AEhwEhuxKtqbeI37vwMYx27cQHsZ6NNxlelCgZfiBG4HsEam8WzMrK0+JbiKTjZyexqxchopegU38Rnfo0xreHAbY5grApiPaxQHgzId4NKnsfyfynbBZGyziRpWYCce5b9eRZGarlQwNPxlVQV4F/t3f+xheI4jES/3wpvDIRzGk0ECfMEMZrEQ3kdcC6A3GdBbuI73gwRICupl3v8VA0OAIcAQYAjwzwOkdQMkmWN4K3NvK+c1M2Wz38QkKfipbMLDSMemwtuBpzH7deHtxYuob+gXYBE/CvptznmjkbBkNVbg9bQUY5e+gg94VkO8vcLLqjFwqQaAy5E9V0pOZ+K4dR7bIqD+NNJ7R/GFyKynizr9GgBEeldN2USYxwAAAABJRU5ErkJggg==); }'+
                         '.sct-rel { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAK5SURBVHja7NddiBZlFAfw3+uuxkqmm4U35UUQ5lVgSmxs+UHBstCFERQoiZiC1IVgHwTlshiJiGKKBdnHhQq6GBVIXij4BYsR7na3QqFXoYGw7WZs6+72dnNGhmHed2a2CxH9w8DM85yZ/5nn/J9zzlOr1+vuJGa4w2iF3t7eMrazsBzdWIrH8FDM3cTvGMCPOIOxJt/agr97enoOtpZ08g28g8UNbB7GQnTgLVzBXnyB8YztdmzFN2VC8BTO4asm5Hl4AvvwE55JjW/Dh5iIS7MV6MJRzC0gq6PWYO5pXMAaPInelPZamjnQhe/xQM7cAH7Az/gjHJgfZN14IfPdNvTlOFlr5MAiHMkhHwodnAzSLE5jN5ZgJ17Mij1n5XI18HmIKo0+LAuFFyWOAbyEj0pvwxTWYGUO+esliLN4sGA+NwRvZ55/xcZpkH+GzQXCrWcdmInHM4YfYLQi+ddYX2DzLyazGpjAsdRzf6i9CvYE+Qj+zLlGImuO4p+8ELyP82iPbThZgbwF+7ELUw3C1pIKwVieA5PT+OsEU7h611XD+w4kGpgdqbdW4p3ZuF5RoG1YHfffpXuFxIH3sBaPhJgaoR2HsK7ijx7GK3H/LV7NOjAnKlpR6T2BTRXJV6TIRcVcEJX0tgZaSuihL5ZxvAL5zKiQaVzDcFaE9YJ8/yVeqxj3pCYsyYx9iltVd8FwReJZ4fSbmfFBHJjONnw3WqvnStiuwkVsyIyPhUNTCjqVJK1OxZ8k6Awn+kOMg7gRc49G8/kyns3ZzvXYOQNFDUmCT4KsD/MyK9YZV1mMRVt/vFkmrKW83hXt86no8/v/R6IbjLAdL0rFM2I19kRSSnA5TkMboikti9+iu+rAL2VS8RA+xo4cm8nocg7j+Ugky1JHsxr+iqPZpWhczyYNRxFq9/zp+L8BAOz5m71fnJ1fAAAAAElFTkSuQmCC); }'+
 						'.sct-rel12 { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAK4SURBVHja7NddiBZlFAfw3+vuKit9aUY35kUQ2lWwKbGhfYiBCF4ogoKi2JYQeSFoilCBKEVIiyUVVKsXKuiyooLkhUJpsCjhbncGRV2FBYLtlrx+vNvbzRkZhnnfmdkuROoPAzPPc2b+Z57zf845T63ZbLqXmOIeoxNeHRgoYzsVL2IZ5mM2Hoq5v/ArRvAVvka9zbe24MaBvr4vOks6uR7b8HQLm5mYg168iZ+xD5/jVsZ2N7biYJkQzMN5DLQhz8OT+BiX8Gxq/F28jTtxabcCS3EUDxeQNVFrMfcMvsVaPIVdKe11tHNgKU5iWs7cCE7hO/weDjwaZMvwQua73RjMcbLWyoG5OJJDfiV0cCZIsziHD9GDD7AkK/aclcvVwGchqjQGsSAUXpQ4RvAK3im9DVNYi5dzyNeUIM7igYL53BBszjz/iNcnQf4p3igQbjPrQBeeyBjuxHhF8gPYWGDzNxpZDdzBsdTzcKi9CvqDfAx/5FxjkTXHcTMvBDtwATNiGzYqkHdgP/ZiokXYOlIhqOc50JjEXyeYwC/3XTX834FEA9Mj9dZKvDMdv1UUaDdWxP2JdK+QOLAd6zArxNQKM3AIGyr+6GGsjPvjWJV14MGoaEWl9zQ2VSR/KUUuKubjUUnvaqCjhB4GYxlvVSDvigqZxlVcz4qwWZDvv8TqinFPakJPZuwj3K66C65XJJ4aTr+WGR/FJ5PZhm9Fa/V8CdvFuIi+zHg9HJpQ0KkkaXUi/iTBwnBiOMQ4imsx91g0n8vxXM52bsbOGSlqSBK8F2SDeCSzYgvjKot6tPVD7TJhLeX13mifz0afP/wvEt1ohG2oKBVPidXoj6SU4Ic4DfVFU1oWP0V31Yvvy6TiK9iD93NsGtHlHMaiSCQLUkezGv6Mo9nlaFy/SRqOItT+86fjfwYA+LGbvXXSQ8QAAAAASUVORK5CYII=); }'+
@@ -188,9 +188,9 @@ function Init(friendMessage, checkBlocked, debug) {
 
                     var newList = [];
                     for (var i in dl) {
-                        if ( dl[i] && (dl[i].sc || dl[i].discord) ) { //filter empty members
-                            $('#current_list').append('<li'+(dl[i].sc == '<span class="unknown">???</span>' ? '' : ' data-sc="'+dl[i].sc+'"')+'> '+
-                                 '<span class="gray">SC:</span> '+dl[i].sc+
+                        if ( dl[i] && !(dl[i] == '<span class="unknown">???</span>' && dl[i].discord == '<span class="unknown">???</span>') ) { //filter empty members
+                            $('#current_list').append('<li'+(dl[i].sc.match(/^[a-z.A-Z_\d]{6,16}$/) ? ' data-sc="'+dl[i].sc+'"' : '')+'> '+
+                                 '<span class="gray">SC:</span> '+(dl[i].sc)+
                                  ' <span class="gray">| Discord:</span> '+dl[i].discord+
                                  (GM_getValue('stats') ? ' <span class="gray">|</span> 💰 '+
 									  (GM_getValue('limit') && dl[i].rawMoney > GM_getValue('limit') ? '<span class="fail">'+dl[i].money+'</span>' : dl[i].money)
@@ -208,6 +208,7 @@ function Init(friendMessage, checkBlocked, debug) {
                     if (!dl || dl.length === 0) {
                         $('#current_list').append('<li class="empty">Nothin\' here, man</li>');
                     }
+					else $('#current_list').append('<li class="total gray">Total dropees: <b>'+$('#current_list > li').length+'</b></li>');
                     changeText();
                 }
 
@@ -235,9 +236,9 @@ function Init(friendMessage, checkBlocked, debug) {
                 }
 
                 function getStats(member, callback, delay) {
-                    if (member.sc == '<span class="unknown">???</span>') {
-                        console.warn('This person doesn\'t have a social club name saved, so no stats.');
-                        callback(member);
+                    if (!member.sc.match(/^[a-z.A-Z_\d]{6,16}$/)) {
+                        console.warn(member.sc+' is not a valid social club name -- no stats.');
+                        setTimeout(callback, delay, member);
                         return;
                     }
                     if (debug) console.log('Delay: '+delay);
@@ -275,10 +276,15 @@ function Init(friendMessage, checkBlocked, debug) {
                                         console.groupEnd();
                                         console.groupEnd();
                                     }
-                                    if ( $(data).prop('id') == 'sectionBlockedStats' ) {
+                                    if ( data.startsWith('<div id="sectionBlockedStats"') ) {
                                         console.warn('No stats available for '+member.sc+' due to privacy settings.');
                                         member.rank = '<span class="unknown">???</span>';
                                         member.money = '<span class="unknown">???</span>';
+                                    } else if ( data.includes("window.SCSettings.nickname = '';") ) {
+                                        console.warn('Social club account '+member.sc+' does not exist.');
+                                        member.rank = '<span class="unknown">???</span>';
+                                        member.money = '<span class="unknown">???</span>';
+										member.sc = '<span class="unknown">'+member.sc+'</span>';
                                     } else {
                                         /*if (debug) {
                                             //console.log(data);
@@ -374,7 +380,7 @@ function Init(friendMessage, checkBlocked, debug) {
                         if (n == txt.length) {//done with reqs
                             if (GM_getValue('stats') && l) swal({
                                 title: "Whoa, slow down there.",
-                                text: "You'll need to wait about 20 seconds to add more people, otherwise stats won't work because rate limits.",
+                                text: "You'll need to wait about 30 seconds to add more people, otherwise stats won't work because rate limits.",
                                 type: "warning",
                                 showConfirmButton: true,
                                 timer: 5000
@@ -421,13 +427,16 @@ function Init(friendMessage, checkBlocked, debug) {
                         if (temp.indexOf('Discord Name: ') !== -1)
                             member.discord = temp[temp.indexOf('Discord Name: ') + 1];
 
-                        if (temp.indexOf(' - SC: ') !== -1)
+                        if (temp.indexOf(' - SC: ') !== -1) {
                             member.sc = temp[temp.indexOf(' - SC: ') + 1];
+							if ( !member.sc.match(/^[a-z.A-Z_\d]{6,16}$/) )
+								member.sc = '<span class="fail">'+member.sc+'</span>';
+						}
 
                         if (temp.indexOf(' - Drops Attended: ') !== -1)
                             member.drops = temp[temp.indexOf(' - Drops Attended: ') + 1];
 
-                        if (GM_getValue('stats') && member.sc !== '<span class="unknown">???</span>') {
+                        if (GM_getValue('stats')) {
                             //check for dupe by SC
                             if (isOnDroplist(member.sc)) {
                                 n++;
@@ -453,9 +462,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                 }
                                 continue;
                             }
-                            var time = 1000 * i;
-
-                            getStats(member, memberDone, time);
+                            getStats(member, memberDone, 1000*i);
                         }
                         else memberDone(member);
                     }
@@ -535,9 +542,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                     for (var i in list) {
                         var member = list[i];
-                        if (member.sc !== '<span class="unknown">???</span>') {
-                            getStats(member, memberDone, 1000*i);
-                        }
+                        getStats(member, memberDone, 1000*i);
                         else memberDone(member);
                     }
                 });
