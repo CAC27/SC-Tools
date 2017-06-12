@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         SC Tools
-// @version      1.4.1
+// @version      1.4.2
 // @description  Useful tools for dropping.
 // @author       CAC
 // @downloadURL  https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js
@@ -543,7 +543,6 @@ function Init(friendMessage, checkBlocked, debug) {
                     for (var i in list) {
                         var member = list[i];
                         getStats(member, memberDone, 1000*i);
-                        else memberDone(member);
                     }
                 });
 
