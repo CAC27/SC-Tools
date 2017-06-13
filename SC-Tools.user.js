@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         SC Tools
-// @version      1.5
+// @version      1.5.1
 // @description  Useful tools for dropping.
 // @author       CAC
 // @downloadURL  https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js
@@ -15,7 +15,7 @@
 var baseURL = window.location.href.match(/^(https:\/\/(\w\w\.|es-mx\.)?socialclub\.rockstargames\.com).*$/)[1];
 //used for language compatibility [Do not delete, it will break the whole script]
 
-// SC regex: /^[a-z.A-Z_\d]{6,16}$/
+var scRegex = /^[a-z\.\-A-Z_\d]{6,16}$/;
 
 // -- Set default values if first run of script --
 if (GM_getValue('checkBlocked') === undefined) {
@@ -195,17 +195,17 @@ function Init(friendMessage, checkBlocked, debug) {
 // -- Functions to be used throughout script --
                 function refreshList(dl, list, list2) {
 					if (!dl) dl = GM_getValue('droplist');
+					if (!list || !GM_getValue('friendcheck')) list = [];
 					for (var b in list) {
 						userdata[list[b].Name.toLowerCase()] = list[b];
 					}
-					if (!list || !GM_getValue('friendcheck')) friends = [];
 					var friends = list.map(function(item) {
 						return item.Name.toLowerCase();
 					});
+					if (!list2 || !GM_getValue('friendcheck')) list2 = [];
 					for (var b in list2) {
 						userdata[list2[b].Name.toLowerCase()] = list2[b];
 					}
-					if (!list2 || !GM_getValue('friendcheck')) pending = [];
 					var pending = list2.map(function(item) {
 						return item.Name.toLowerCase();
 					});
@@ -215,7 +215,7 @@ function Init(friendMessage, checkBlocked, debug) {
                     for (var i in dl) {
                         if ( dl[i] && !(dl[i] == '<span class="unknown">???</span>' && dl[i].discord == '<span class="unknown">???</span>') ) { //filter empty members
 							let friendButton = '';
-							if (GM_getValue('friendcheck') && dl[i].sc.match(/^[a-z.A-Z_\d]{6,16}$/)) {
+							if (GM_getValue('friendcheck') && dl[i].sc.match(scRegex)) {
 								if (friends.indexOf(dl[i].sc.toLowerCase()) > -1) {
 									//console.log(list[friends.indexOf(dl[i].sc.toLowerCase())]);
 									if (list[friends.indexOf(dl[i].sc.toLowerCase())].AllowCancel)
@@ -227,7 +227,7 @@ function Init(friendMessage, checkBlocked, debug) {
 									friendButton = '<span class="sctb-16 sct-addfrd"></span>';
 								}
 							}
-                            $('#current_list').append('<li'+(dl[i].sc.match(/^[a-z.A-Z_\d]{6,16}$/) ? ' data-sc="'+dl[i].sc+'"' : '')+'> '+
+                            $('#current_list').append('<li'+(dl[i].sc.match(scRegex) ? ' data-sc="'+dl[i].sc+'"' : '')+'> '+
                                  '<span class="gray">SC: </span>'+
 								 (friends.indexOf(dl[i].sc.toLowerCase()) > -1 ? '<span class="friend">'+dl[i].sc+'</span>' : dl[i].sc)+
                                  '<span class="gray"> | Discord: </span>'+dl[i].discord+
@@ -237,7 +237,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                  (GM_getValue('stats') ? '<span class="gray"> | </span>🌐 '+dl[i].rank : '')+
                                  '<span class="gray"> | Drops: </span>'+dl[i].drops+
                                  '<span class="sctb-16 sct-del"></span>'+
-                                 (GM_getValue('stats') && dl[i].sc.match(/^[a-z.A-Z_\d]{6,16}$/) ? '<span class="sctb-16 sct-rel"></span>' : '')+
+                                 (GM_getValue('stats') && dl[i].sc.match(scRegex) ? '<span class="sctb-16 sct-rel"></span>' : '')+
 								 (GM_getValue('stats') && i % 12 === 0 ? '<span class="sctb-16 sct-rel12"></span>' : '')+friendButton+
                             '</li>');
                             newList.push(dl[i]);
@@ -275,7 +275,7 @@ function Init(friendMessage, checkBlocked, debug) {
                 }
 
                 function getStats(member, callback, delay) {
-                    if (!member.sc.match(/^[a-z.A-Z_\d]{6,16}$/)) {
+                    if (!member.sc.match(scRegex)) {
                         console.warn(member.sc+' is not a valid social club name -- no stats.');
                         setTimeout(callback, delay, member);
                         return;
@@ -457,7 +457,7 @@ function Init(friendMessage, checkBlocked, debug) {
 								}
 
 								if (list.length < data.TotalCount) {
-									refresh(dl, list, (pageIndex + 1));
+									refresh(dl, list, list2, (pageIndex + 1));
 								} else {
 									if (debug) console.log('Retrieved friends:\n'+list);
 									$.ajax({
@@ -493,7 +493,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
 											if (data.Status === true && data.TotalCount > 0) {
 												data.RockstarAccounts.forEach(function(e) {
-													list2.push(e);
+													if (e !== undefined) list2.push(e);
 												});
 
 												if (list2.length == data.TotalCount) {
@@ -604,7 +604,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
                         if (temp.indexOf(' - SC: ') !== -1) {
                             member.sc = temp[temp.indexOf(' - SC: ') + 1];
-							if ( !member.sc.match(/^[a-z.A-Z_\d]{6,16}$/) ) {
+							if ( !member.sc.match(scRegex) ) {
 								member.sc = '<span class="fail">'+member.sc+'</span>';
 								member.rank = '--';
 								member.money = '--';
@@ -758,7 +758,7 @@ function Init(friendMessage, checkBlocked, debug) {
 
 				$('#current_list').on('click', '.sct-addfrd', function() {
                     var name = $(this).parent().attr('data-sc');
-					if (!name || !name.match(/^[a-z.A-Z_\d]{6,16}$/)) {
+					if (!name || !name.match(scRegex)) {
 						swal({
 							allowOutsideClick: true,
 							text: 'The nickname "'+name+'" is invalid.',
@@ -973,7 +973,7 @@ function Init(friendMessage, checkBlocked, debug) {
                                 return false;
                             }
 
-                            if (inputValue.trim().match(new RegExp("([^A-Za-z0-9-_\.])"))) {
+                            if (!inputValue.trim().match(scRegex)) {
                                 swal.showInputError("The username field contains invalid characters.");
                                 return false;
                             }
