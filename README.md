@@ -42,10 +42,10 @@ Delete dropees | Remove all friends / reject all requests from dropees. Useful i
 ### Droplist info
 * Names: 
   * Orange name = the name is fake because it does not match Rockstar's naming rules.
-  * Yellow name = the account does not exist OR you've added yourself to your droplist.
-  * Blue name = this person is your friend OR you've sent them a request.
+  * Yellow name = the account does not exist OR they have no relationship with you. [BETA] ~~OR you've added yourself to your droplist.~~ (old version)
+  * Blue name = this person is your friend ~~OR you've sent them a request.~~ (old version)
   * Green name [BETA] = request pending (sent or received.)
-  * Purple name [BETA] = you've sent them a friend request.
+  * Purple name [BETA] = you've added yourself to the droplist.
   * Red name [BETA] = user is blocked.
 * Icons:
   * **`🗑`** = delete from droplist
