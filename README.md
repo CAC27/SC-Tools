@@ -48,7 +48,7 @@ Delete dropees | Remove all friends / reject all requests from dropees. Useful i
   * Purple name [BETA] = you've sent them a friend request.
   * Red name [BETA] = user is blocked.
 * Icons:
-  * :wastebasket: **`🗑`** = delete from droplist
+  * **`🗑`** = delete from droplist
   * Gray **`↻`** = refresh stats
   * Blue **`↻`** = refresh stats for the next 12 dropees
   * Green **`👤+`** = send a friend request
