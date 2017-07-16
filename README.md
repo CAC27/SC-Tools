@@ -14,7 +14,7 @@ Then click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js)
 ### Beta information
 Pros: Much more efficient code, a few extra features, and generally less glitchy. It'll be updated more often.
 
-Cons: Currently users will show as an unknown SC account unless they have a "Relationship" with you (friends/a friend request/blocked).
+Cons: Currently users will show as an unknown SC account unless they have a "Relationship" with you (friends/a friend request/blocked). Also, friend won't refresh automatically in most cases, gotta do it manually for now 🤷
 
 ### What does this button do?
 ##### When no droplist is active:
