@@ -2,20 +2,19 @@
 
 *What's this?* It's a script adding tools to the [Social Club website](https://socialclub.rockstargames.com/) for accepting/rejecting friend requests, deleting friends, and more. If you choose to provide a list of people you're dropping, it will be smart in keeping uninvited guests out and accepting your dropees quickly.
 
+__Unfortunately it only works on Chrome afaik, but feel free to test it using other browsers.__
+
 ### Installation
-##### *For Chrome:*
-First install [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=chrome). It's a userscript manager with some security features built-in (so that scripts like this can't damage your PC.)
+First install [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=chrome). It's a userscript manager with some security features built-in.
 
 Then click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js) or find `SC-Tools.user.js` in this repository and click `Raw`.
 
-##### ~~*For Firefox:*~~
-~~First install [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/). It's a userscript manager with some security features built-in (so that scripts like this can't damage your PC.)~~
+**`NEW!`** Get the beta version [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools-BETA.user.js) or find `SC-Tools-BETA.user.js` in this repository and click `Raw`.
 
-~~Then click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools-FF.user.js) or find `SC-Tools-FF.user.js` in this repository and click `Raw`.~~
+### Beta information
+Pros: Much more efficient code, a few extra features, and generally less glitchy. It'll be updated more often.
 
-*Firefox just doesn't work with this script at all. It appears there's no simple fix so you might as well use Chrome for the time being.*
-##### *Other browsers*
-If you can manage to use Tampermonkey and install this on another browser, good for you ¯\\_(ツ)_/¯
+Cons: Currently users will show as an unknown SC account unless they have a "Relationship" with you (friends/a friend request/blocked).
 
 ### What does this button do?
 ##### When no droplist is active:
@@ -44,15 +43,20 @@ Delete dropees | Remove all friends / reject all requests from dropees. Useful i
 * Names: 
   * Orange name = the name is fake because it does not match Rockstar's naming rules.
   * Yellow name = the account does not exist OR you've added yourself to your droplist.
-  * Blue name = this person is your friend OR you've sent them a request. 
+  * Blue name = this person is your friend OR you've sent them a request.
+  * Green name [BETA] = request pending (sent or received.)
+  * Purple name [BETA] = you've sent them a friend request.
+  * Red name [BETA] = user is blocked.
 * Icons:
-  * Trashcan = delete from droplist
-  * Reload = refresh stats
-  * Blue reload = refresh stats for the next 12 dropees
-  * Green person `+` = send a friend request
-  * Red person `-` = remove friend
-  * Yellow person `-` (by a blue name) = cancel friend request
-  * Yellow person `+`/`-` (by white name) = accept/reject friend request, respectively
+  * :wastebasket: **`🗑`** = delete from droplist
+  * Gray **`↻`** = refresh stats
+  * Blue **`↻`** = refresh stats for the next 12 dropees
+  * Green **`👤+`** = send a friend request
+  * Red **`👤-`** = remove friend
+  * Yellow **`👤-`** (by a blue name) = cancel friend request
+  * Yellow **`👤+`**/**`-`** (by white name) = accept/reject friend request, respectively
+  * Red `🚫` [BETA] = Block user
+  * Yellow `🚫` [BETA] = Unblock user
 * Stats:
   * Yellow question marks mean stats are hidden by the player.
   * Orange question marks mean that: Either
@@ -74,6 +78,3 @@ There is now a full-featured settings menu! This allows you to toggle a few opti
 ### Credits
 * Big shoutout to [Nadermane](https://github.com/Nadermane) for making the base for this project.
 * Respect to those in [GTAGivers](https://discord.gg/gtagivers) for fighting the tyranny of Cuckstar one dollar at a time. This is for you to enjoy. :v:
-
-### Donate :moneybag:
-If you enjoyed my work, a donation of any amount to https://paypal.me/CAC27 would be highly appreciated. :ok_hand:
