@@ -9,13 +9,6 @@ First install [Tampermonkey](https://tampermonkey.net/?ext=dhdg&browser=chrome).
 
 Then click [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js) or find `SC-Tools.user.js` in this repository and click `Raw`.
 
-**`NEW!`** Get the beta version [here](https://github.com/CAC27/SC-Tools/raw/master/SC-Tools-BETA.user.js) or find `SC-Tools-BETA.user.js` in this repository and click `Raw`.
-
-### Beta information
-Pros: Much more efficient code, a few extra features, and generally less glitchy. It'll be updated more often.
-
-Cons: Currently users will show as an unknown SC account unless they have a "Relationship" with you (friends/a friend request/blocked). Also, friend won't refresh automatically in most cases, gotta do it manually for now 🤷
-
 ### What does this button do?
 ##### When no droplist is active:
 Button | Function
@@ -34,6 +27,7 @@ Reject non-dropees | Rejects all friend requests you have received from people t
 Delete dropees | Remove all friends / reject all requests from dropees. Useful if you only have one account.
 
 ##### General info
+* Unfortunatly, friends (on your droplist) will no longer auto-refresh for now (except when you add new users. But that's what the `Refresh Friends` button is there for :stuck_out_tongue:
 * `Auto-accept` works the same way as the normal accept button: accepts dropees if you have a droplist or all requests if you don't.
 * Looped requests (accept *all*, delete *all*, etc.) are done once per second because rate limits.
 * After accepting friends from the droplist, it's advisable to reload stats as many players set their privacy settings to only share stats with friends.
@@ -42,21 +36,21 @@ Delete dropees | Remove all friends / reject all requests from dropees. Useful i
 ### Droplist info
 * Names: 
   * Orange name = the name is fake because it does not match Rockstar's naming rules.
-  * Yellow name = the account does not exist OR they have no relationship with you. [BETA] ~~OR you've added yourself to your droplist.~~ (old version)
-  * Blue name = this person is your friend ~~OR you've sent them a request.~~ (old version)
-  * Green name [BETA] = request pending (sent or received.)
-  * Purple name [BETA] = you've added yourself to the droplist.
-  * Red name [BETA] = user is blocked.
+  * Yellow name = the account does not exist OR they have no relationship with you.
+  * Blue name = user is your friend.
+  * Green name = request pending (sent or received.)
+  * Purple name = you've added yourself to the droplist.
+  * Red name = user is blocked.
 * Icons:
   * **`🗑`** = delete from droplist
   * Gray **`↻`** = refresh stats
   * Blue **`↻`** = refresh stats for the next 12 dropees
   * Green **`👤+`** = send a friend request
   * Red **`👤-`** = remove friend
-  * Yellow **`👤-`** (by a blue name) = cancel friend request
-  * Yellow **`👤+`**/**`-`** (by white name) = accept/reject friend request, respectively
-  * Red `🚫` [BETA] = Block user
-  * Yellow `🚫` [BETA] = Unblock user
+  * Yellow **`👤-`** = cancel friend request
+  * Yellow **`👤+`**/**`-`** = accept/reject friend request, respectively
+  * Red `🚫` = Block user
+  * Yellow `🚫` = Unblock user
 * Stats:
   * Yellow question marks mean stats are hidden by the player.
   * Orange question marks mean that: Either
