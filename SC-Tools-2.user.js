@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         SC Tools BETA
-// @version      2.0
+// @name         SC Tools
+// @version      2.0.1
 // @description  Useful tools for dropping.
 // @author       CAC
 // @downloadURL  https://github.com/CAC27/SC-Tools/raw/master/SC-Tools.user.js
@@ -97,8 +97,8 @@ function main() {
 
 
 // --- Page functions ---
-function showDroplist() { // cut pieces: ][ - <b>Drops Attended:</b> x> ][ | Drops attended.
-    $('.alertBox.notFound').replaceWith('<div id="sctools"><div id="droplist" class="activePanel"> <div class="gridPanel sct" id="droplist_info"> <h3 class="sct">Edit Droplist</h3> <p class="sct">This is designed to accept dropBot messages:<br><br> <b>Discord Name:</b> someName - <b>Discord ID:</b> 1234567890 - <b>SC:</b> socialClubName<br><i>(one dropee per line)</i> <br><br>So just directly copy and paste them. <br><br>Note that the button functions change if you have a droplist. </p> <div id="droplist_input_wrapper"> <textarea id="droplist_input" placeholder="Discord Name: CAC - SC: ¯\\_(ツ)_/¯ - Drops Attended: 19\nDiscord Name: YellowHeart - SC: 🤔 - Drops Attended: 70"></textarea> <a class="btn btnGold btnrounded sctb2" href="#" id="sct-add">add</a> <a class="btn btnGold btnRounded sctb2" href="#" id="sct-remove">remove</a> </div></div><div class="gridPanel sct" id="current_droplist"> <h3 class="sct">Current Droplist</h3> <p class="sct">This is a list of your dropees, including some info about them.<br><br>It will be in the format:<br>SC name | Discord name | Total money | Rank<br><br><i>Note: Stats (rank/cash) will be unavailable for some players, due to privacy settings.</i> </p> <div id="droplist_wrapper"> <ul id="current_list">   <li class="empty">Loading droplist...</li> </ul> <a class="btn btnGold btnrounded sctb2" href="#" id="sct-clear">clear</a><a class="btn btnGold btnrounded sctb2" href="#" id="sct-reffrd">refresh friends</a></div></div></div></div>');
+function showDroplist() {
+    $('.alertBox.notFound').replaceWith('<div id="sctools"><div id="droplist" class="activePanel"> <div class="gridPanel sct" id="droplist_info"> <h3 class="sct">Edit Droplist</h3> <p class="sct">This is designed to accept dropBot messages:<br><br> <b>Discord:</b> someName - <b>ID:</b> 123456789012345678 - <b>SC:</b> socialClubName - <b>Drops Attended:</b> x<br><i>(one dropee per line)</i> <br><br>So just directly copy and paste them. <br><br>Note that the button functions change if you have a droplist. </p> <div id="droplist_input_wrapper"> <textarea id="droplist_input" placeholder="Discord: CAC - ID: 246107833295175681 - SC: ¯\\_(ツ)_/¯ - Drops Attended: 19\nDiscord: YellowHeart - ID: 225093001641197569 - SC: 🤔 - Drops Attended: 70"></textarea> <a class="btn btnGold btnrounded sctb2" href="#" id="sct-add">add</a> <a class="btn btnGold btnRounded sctb2" href="#" id="sct-remove">remove</a> </div></div><div class="gridPanel sct" id="current_droplist"> <h3 class="sct">Current Droplist</h3> <p class="sct">This is a list of your dropees, including some info about them.<br><br>It will be in the format:<br>SC name | Discord name | Total money | Rank | Drops attended.<br><br><i>Note: Stats (rank/cash) will be unavailable for some players, due to privacy settings.</i> </p> <div id="droplist_wrapper"> <ul id="current_list">   <li class="empty">Loading droplist...</li> </ul> <a class="btn btnGold btnrounded sctb2" href="#" id="sct-clear">clear</a><a class="btn btnGold btnrounded sctb2" href="#" id="sct-reffrd">refresh friends</a></div></div></div></div>');
     $('head').append('<style id="sctools_style">h3.sct { color: white; padding: 5px; } p.sct { color: #bbb; padding: 10px; } textarea#droplist_input { color: #fff; width: 99%; min-height: 300px; margin: 5px; background: #222; padding:  5px; border: 2px solid #444; border-radius: 10px; } a.btn.btngold.btnrounded.sctb2 { margin: 5px; } .gridPanel.sct { padding: 10px !important; } div#current_droplist { float: right; width: 59%; } div#droplist_info { float: left; width: 39%; } .empty, .gray { color: #666; } .total { text-align: right; } ul#current_list { color: #fff; background: #222; padding: 10px; margin: 5px; } #current_list li { padding:  5px; border-bottom: 2px solid #666; } .unknown { color: #FB0; } #current_list .bl { color: #F00; } #current_list a.bl:hover { color: #F33; } .fail { color: #F70 } #current_list .friend { color: #49c3ff } #current_list .friend:hover { color: #7aebff; } .sctb-16 { float: right; margin-left: 3px; height: 16px; width: 16px; background-size: 16px; display: inline-block; transition: 150ms; } .sctb-16:hover { filter: brightness(1.5); cursor: pointer; } #current_list > li > img { display: inline; height: 22px; margin: -3px 6px -7px -5px; } #current_list .pending { color: #00de00; } #current_list .pending:hover { color: #54ff54; } .me { color: magenta; } #current_list a { color: #fff; } #current_list a:hover { color: #bbb; }'+
         '.sct-del { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAIhIAACISAFlEbUFAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAHNSURBVHja7Ne9axRBGMfxz94diQlnSGN8AQXFQlCxsBUrFQVFUUvFzj9Bi2ssPBDs/BPyBwgBXyE2VloElKigIgFf0EIUVBSJcW2eg2VZs+txG0XuB8sMv5md/c7sM7vzJGmagk6no0QTuIhjWI2fufYGvuEOzuHtcoN1u13QUl1XcKakzyROYS0OVBm0KsAaHI36PKajnkSZYgnHsQf7sB2P+wHYha0xICxiS8wOHuAuxnP3fcX6AEhwEhuxKtqbeI37vwMYx27cQHsZ6NNxlelCgZfiBG4HsEam8WzMrK0+JbiKTjZyexqxchopegU38Rnfo0xreHAbY5grApiPaxQHgzId4NKnsfyfynbBZGyziRpWYCce5b9eRZGarlQwNPxlVQV4F/t3f+xheI4jES/3wpvDIRzGk0ECfMEMZrEQ3kdcC6A3GdBbuI73gwRICupl3v8VA0OAIcAQYAjwzwOkdQMkmWN4K3NvK+c1M2Wz38QkKfipbMLDSMemwtuBpzH7deHtxYuob+gXYBE/CvptznmjkbBkNVbg9bQUY5e+gg94VkO8vcLLqjFwqQaAy5E9V0pOZ+K4dR7bIqD+NNJ7R/GFyKynizr9GgBEeldN2USYxwAAAABJRU5ErkJggg==); }'+
         '.sct-rel { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAK5SURBVHja7NddiBZlFAfw3+uuxkqmm4U35UUQ5lVgSmxs+UHBstCFERQoiZiC1IVgHwTlshiJiGKKBdnHhQq6GBVIXij4BYsR7na3QqFXoYGw7WZs6+72dnNGhmHed2a2CxH9w8DM85yZ/5nn/J9zzlOr1+vuJGa4w2iF3t7eMrazsBzdWIrH8FDM3cTvGMCPOIOxJt/agr97enoOtpZ08g28g8UNbB7GQnTgLVzBXnyB8YztdmzFN2VC8BTO4asm5Hl4AvvwE55JjW/Dh5iIS7MV6MJRzC0gq6PWYO5pXMAaPInelPZamjnQhe/xQM7cAH7Az/gjHJgfZN14IfPdNvTlOFlr5MAiHMkhHwodnAzSLE5jN5ZgJ17Mij1n5XI18HmIKo0+LAuFFyWOAbyEj0pvwxTWYGUO+esliLN4sGA+NwRvZ55/xcZpkH+GzQXCrWcdmInHM4YfYLQi+ddYX2DzLyazGpjAsdRzf6i9CvYE+Qj+zLlGImuO4p+8ELyP82iPbThZgbwF+7ELUw3C1pIKwVieA5PT+OsEU7h611XD+w4kGpgdqbdW4p3ZuF5RoG1YHfffpXuFxIH3sBaPhJgaoR2HsK7ijx7GK3H/LV7NOjAnKlpR6T2BTRXJV6TIRcVcEJX0tgZaSuihL5ZxvAL5zKiQaVzDcFaE9YJ8/yVeqxj3pCYsyYx9iltVd8FwReJZ4fSbmfFBHJjONnw3WqvnStiuwkVsyIyPhUNTCjqVJK1OxZ8k6Awn+kOMg7gRc49G8/kyns3ZzvXYOQNFDUmCT4KsD/MyK9YZV1mMRVt/vFkmrKW83hXt86no8/v/R6IbjLAdL0rFM2I19kRSSnA5TkMboikti9+iu+rAL2VS8RA+xo4cm8nocg7j+Ugky1JHsxr+iqPZpWhczyYNRxFq9/zp+L8BAOz5m71fnJ1fAAAAAElFTkSuQmCC); }'+
@@ -637,7 +637,7 @@ $('#page').on('click', '#sct-add', function() {
 	});
 
 	for (var i in txt) {
-		var temp = txt[i].split(/(Discord Name: )|( - Discord ID: )|( - SC: )|( - Drops Attended: )/).filter(item => {
+		var temp = txt[i].split(/(Discord: )|( - ID: )|( - SC: )|( - Drops Attended: )/).filter(item => {
 			return item; //remove undefined and ''
 		});
 		//if (GM_getValue('debug')) console.log(temp);
@@ -648,17 +648,17 @@ $('#page').on('click', '#sct-add', function() {
 			money: '<span class="unknown">???</span>',
 			rawMoney: 0,
 			discord: '<span class="unknown">???</span>',
-			//drops: '<span class="unknown">???</span>', //dropBot removed drops attended for limited lobbies
+			drops: '<span class="unknown">???</span>',
 			id: '<span class="unknown">???</span>',
 			RockstarId: false,
 			Relation: false,
 			scExists: undefined
 		};
 
-		if (temp.indexOf('Discord Name: ') !== -1)
+		if (temp.indexOf('Discord: ') !== -1)
 			member.discord = temp[temp.indexOf('Discord Name: ') + 1];
 
-		if (temp.indexOf(' - Discord ID: ') !== -1)
+		if (temp.indexOf(' - ID: ') !== -1)
 			member.id = temp[temp.indexOf(' - Discord ID: ') + 1];
 
 		if (temp.indexOf(' - SC: ') !== -1) {
@@ -674,8 +674,8 @@ $('#page').on('click', '#sct-add', function() {
 			}
 		}
 
-		//if (temp.indexOf(' - Drops Attended: ') !== -1)
-			//member.drops = temp[temp.indexOf(' - Drops Attended: ') + 1];
+		if (temp.indexOf(' - Drops Attended: ') !== -1)
+			member.drops = temp[temp.indexOf(' - Drops Attended: ') + 1];
 
 		//check for dupe by SC
 		if (isOnDroplist(member.sc)) {
@@ -696,13 +696,13 @@ $('#page').on('click', '#sct-remove', function() {
     var list = GM_getValue('droplist');
 
     for (var i in txt) {
-        var temp = txt[i].split(/(Discord Name: )|( - Discord ID: )|( - SC: )|( - Drops Attended: )/).filter(item => {
+        var temp = txt[i].split(/(Discord: )|( - ID: )|( - SC: )|( - Drops Attended: )/).filter(item => {
             return item; //remove undefined and ''
         });
         var ids = list.map(item => { return item.id; });
         var s = list.map(item => { return item.sc.toLowerCase(); });
         var sc = temp[temp.indexOf(' - SC: ') + 1].toLowerCase();
-        var id = temp[temp.indexOf(' - Discord ID: ') + 1];
+        var id = temp[temp.indexOf(' - ID: ') + 1];
 
         if (s.indexOf(sc) > -1)
             list.splice(s.indexOf(sc), 1);
